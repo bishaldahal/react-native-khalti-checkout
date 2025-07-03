@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "khalti-payment-sdk": ["../src/index"],
+      "khalti-payment-sdk/*": ["../src/*"]
+    }
+  }
+}

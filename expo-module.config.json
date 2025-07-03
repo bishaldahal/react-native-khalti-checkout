@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["KhaltiPaymentSdkModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.khaltipaymentsdk.KhaltiPaymentSdkModule"]
+  }
+}

@@ -1,4 +1,8 @@
-import { PaymentArgs, ValidationResult, KhaltiEnvironment } from './KhaltiPaymentSdk.types';
+import {
+  PaymentArgs,
+  ValidationResult,
+  KhaltiEnvironment,
+} from "./KhaltiPaymentSdk.types";
 
 /**
  * Validates payment arguments before processing
@@ -9,29 +13,30 @@ export function validatePaymentArgs(args: PaymentArgs): ValidationResult {
   const errors: string[] = [];
 
   // Validate public key
-  if (!args.publicKey || typeof args.publicKey !== 'string') {
-    errors.push('Public key is required and must be a string');
+  if (!args.publicKey || typeof args.publicKey !== "string") {
+    errors.push("Public key is required and must be a string");
   } else if (args.publicKey.trim().length < 10) {
-    errors.push('Public key must be at least 10 characters long');
-  } else if (!args.publicKey.startsWith('live_') && !args.publicKey.startsWith('test_')) {
-    errors.push('Public key must start with "live_" or "test_"');
+    errors.push("Public key must be at least 10 characters long");
   }
+  // else if (!args.publicKey.startsWith('live_') && !args.publicKey.startsWith('test_')) {
+  //   errors.push('Public key must start with "live_" or "test_"');
+  // }
 
   // Validate PIDX
-  if (!args.pidx || typeof args.pidx !== 'string') {
-    errors.push('PIDX is required and must be a string');
+  if (!args.pidx || typeof args.pidx !== "string") {
+    errors.push("PIDX is required and must be a string");
   } else if (args.pidx.trim().length < 5) {
-    errors.push('PIDX must be at least 5 characters long');
+    errors.push("PIDX must be at least 5 characters long");
   }
 
   // Validate environment
-  if (args.environment && !['TEST', 'PROD'].includes(args.environment)) {
+  if (args.environment && !["TEST", "PROD"].includes(args.environment)) {
     errors.push('Environment must be either "TEST" or "PROD"');
   }
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -40,8 +45,10 @@ export function validatePaymentArgs(args: PaymentArgs): ValidationResult {
  * @param publicKey Khalti public key
  * @returns Suggested environment
  */
-export function getEnvironmentFromPublicKey(publicKey: string): KhaltiEnvironment {
-  return publicKey.startsWith('live_') ? 'PROD' : 'TEST';
+export function getEnvironmentFromPublicKey(
+  publicKey: string
+): KhaltiEnvironment {
+  return publicKey.startsWith("live_") ? "PROD" : "TEST";
 }
 
 /**
@@ -51,9 +58,11 @@ export function getEnvironmentFromPublicKey(publicKey: string): KhaltiEnvironmen
  */
 export function sanitizePaymentArgs(args: PaymentArgs): PaymentArgs {
   return {
-    publicKey: args.publicKey?.trim() || '',
-    pidx: args.pidx?.trim() || '',
-    environment: args.environment || getEnvironmentFromPublicKey(args.publicKey?.trim() || '')
+    publicKey: args.publicKey?.trim() || "",
+    pidx: args.pidx?.trim() || "",
+    environment:
+      args.environment ||
+      getEnvironmentFromPublicKey(args.publicKey?.trim() || ""),
   };
 }
 
@@ -63,10 +72,10 @@ export function sanitizePaymentArgs(args: PaymentArgs): PaymentArgs {
  * @returns Formatted error message
  */
 export function formatValidationErrors(errors: string[]): string {
-  if (errors.length === 0) return '';
+  if (errors.length === 0) return "";
   if (errors.length === 1) return errors[0];
-  
-  return `Multiple validation errors:\n${errors.map((error, index) => `${index + 1}. ${error}`).join('\n')}`;
+
+  return `Multiple validation errors:\n${errors.map((error, index) => `${index + 1}. ${error}`).join("\n")}`;
 }
 
 /**

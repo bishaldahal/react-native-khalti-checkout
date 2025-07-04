@@ -6,7 +6,7 @@ import {
   PaymentCancelPayload,
   PaymentConfigResponse,
   PaymentCloseResponse,
-  KhaltiErrorCode,
+//   KhaltiErrorCode,
 } from "./KhaltiPaymentSdk.types";
 import {
   validatePaymentArgs,

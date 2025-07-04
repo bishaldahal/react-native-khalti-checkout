@@ -1,0 +1,16 @@
+{
+  "development": {
+    "publicKey": "test_public_key_dc74e0fd57cb46cd93832aee0a390234",
+    "secretKey": "test_secret_key_f59e8b7d18b4499bb4b8da8545296eae",
+    "environment": "TEST",
+    "returnUrl": "https://example.com/payment/",
+    "websiteUrl": "https://example.com"
+  },
+  "production": {
+    "publicKey": "live_public_key_YOUR_KEY_HERE",
+    "secretKey": "live_secret_key_YOUR_KEY_HERE",
+    "environment": "PROD",
+    "returnUrl": "https://yourwebsite.com/payment/",
+    "websiteUrl": "https://yourwebsite.com"
+  }
+}

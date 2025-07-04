@@ -12,8 +12,8 @@ export interface KhaltiConfig {
 
 // Default test configuration (safe to commit)
 export const DEFAULT_TEST_CONFIG: KhaltiConfig = {
-  publicKey: "test_public_key_dc74e0fd57cb46cd93832aee0a390234",
-  secretKey: "test_secret_key_f59e8b7d18b4499bb4b8da8545296eae", 
+  publicKey: "b9288a8a24c144e389d012ce992eea58",
+  secretKey: "8472e5a3a43541e6ba54e623d17f8c95", 
   environment: "TEST",
   returnUrl: "https://example.com/payment/",
   websiteUrl: "https://example.com",

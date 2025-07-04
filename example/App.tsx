@@ -37,11 +37,13 @@ export default function App() {
   const startPayment = async () => {
     try {
       setPaymentStatus("Starting payment...");
+      
+      // Note: In a real app, you need to get pidx from your backend by calling
+      // the Khalti payment initiation API first. This is just for demo purposes.
       const result = await KhaltiPaymentSdk.startPayment({
-        publicKey: "f84d5a579518492d94e345e02311e733",
-        productId: "pid123",
-        productName: "React Native Khalti Test",
-        amount: 1000, // in paisa (10 rupees)
+        publicKey: "f84d5a579518492d94e345e02311e733", // Use your actual public key
+        pidx: "P3Ur4xSzGecSjSaPnRFr6F", // This should come from payment initiation API
+        environment: "TEST", // Use "TEST" or "PROD"
       });
       console.log("Payment result:", result);
     } catch (error) {
@@ -56,7 +58,7 @@ export default function App() {
         <Group name="Khalti Payment SDK Test">
           <Text style={styles.status}>Status: {paymentStatus}</Text>
           <TouchableOpacity style={styles.button} onPress={startPayment}>
-            <Text style={styles.buttonText}>Start Payment (Rs. 10)</Text>
+            <Text style={styles.buttonText}>Start Payment (Test)</Text>
           </TouchableOpacity>
         </Group>
       </ScrollView>

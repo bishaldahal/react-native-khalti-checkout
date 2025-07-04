@@ -25,7 +25,7 @@ repositories {
 
 dependencies {
   // Khalti Android SDK - Using known working version with support library exclusions
-  implementation("com.khalti:khalti-android:2.04.00") {
+  implementation("com.khalti:checkout-android:0.07.00") {
     exclude group: 'com.android.support'
     exclude module: 'support-compat'
     exclude module: 'support-media-compat'
@@ -42,7 +42,4 @@ dependencies {
   implementation 'androidx.cardview:cardview:1.0.0'
   implementation 'com.google.android.material:material:1.11.0'
   implementation 'androidx.core:core-ktx:1.12.0'
-  
-  // Material Progress Bar with AndroidX support
-  implementation 'me.zhanghai.android.materialprogressbar:library:1.6.1'
 }

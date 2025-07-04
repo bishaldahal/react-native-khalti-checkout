@@ -1,15 +1,14 @@
-import { registerWebModule, NativeModule } from 'expo';
+import { PaymentArgs } from './KhaltiPaymentSdk.types';
 
-import { KhaltiPaymentSdkModuleEvents } from './KhaltiPaymentSdk.types';
-
-class KhaltiPaymentSdkModule extends NativeModule<KhaltiPaymentSdkModuleEvents> {
-  PI = Math.PI;
-  async setValueAsync(value: string): Promise<void> {
-    this.emit('onChange', { value });
-  }
-  hello() {
-    return 'Hello world! 👋';
-  }
-}
-
-export default registerWebModule(KhaltiPaymentSdkModule, 'KhaltiPaymentSdkModule');
+export default {
+  async startPayment(args: PaymentArgs): Promise<any> {
+    console.warn('Khalti Payment SDK is not supported on web platform');
+    throw new Error('Khalti Payment SDK is not supported on web platform');
+  },
+  addListener: () => {
+    // No-op for web
+  },
+  removeAllListeners: () => {
+    // No-op for web
+  },
+};

@@ -1,11 +1,9 @@
 import { NativeModule, requireNativeModule } from 'expo';
 
-import { KhaltiPaymentSdkModuleEvents } from './KhaltiPaymentSdk.types';
+import { KhaltiPaymentSdkModuleEvents, PaymentArgs } from './KhaltiPaymentSdk.types';
 
 declare class KhaltiPaymentSdkModule extends NativeModule<KhaltiPaymentSdkModuleEvents> {
-  PI: number;
-  hello(): string;
-  setValueAsync(value: string): Promise<void>;
+  startPayment(args: PaymentArgs): Promise<any>;
 }
 
 // This call loads the native module object from the JSI.

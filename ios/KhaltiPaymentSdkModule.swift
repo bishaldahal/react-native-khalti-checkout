@@ -1,41 +1,21 @@
 import ExpoModulesCore
 
 public class KhaltiPaymentSdkModule: Module {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
   public func definition() -> ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('KhaltiPaymentSdk')` in JavaScript.
     Name("KhaltiPaymentSdk")
 
-    // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-    Constants([
-      "PI": Double.pi
-    ])
+    // Define the events that can be sent to JavaScript
+    Events("onPaymentSuccess", "onPaymentError", "onPaymentCancel")
 
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
-
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      return "Hello world! 👋"
+    // Define the startPayment async function
+    AsyncFunction("startPayment") { (args: PaymentArgs, promise: Promise) in
+      // For now, we'll reject with a not implemented error
+      // You'll need to integrate the actual Khalti iOS SDK here
+      promise.reject("NOT_IMPLEMENTED", "iOS implementation not yet available", nil)
     }
 
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { (value: String) in
-      // Send an event to JavaScript.
-      self.sendEvent("onChange", [
-        "value": value
-      ])
-    }
-
-    // Enables the module to be used as a native view. Definition components that are accepted as part of the
-    // view definition: Prop, Events.
+    // Enable view component
     View(KhaltiPaymentSdkView.self) {
-      // Defines a setter for the `url` prop.
       Prop("url") { (view: KhaltiPaymentSdkView, url: URL) in
         if view.webView.url != url {
           view.webView.load(URLRequest(url: url))
@@ -45,4 +25,14 @@ public class KhaltiPaymentSdkModule: Module {
       Events("onLoad")
     }
   }
+}
+
+// Define the PaymentArgs record for iOS
+struct PaymentArgs: Record {
+  @Field var publicKey: String = ""
+  @Field var productId: String = ""
+  @Field var productName: String = ""
+  @Field var amount: Double = 0.0
+  @Field var productUrl: String?
+  @Field var additionalData: [String: Any]?
 }

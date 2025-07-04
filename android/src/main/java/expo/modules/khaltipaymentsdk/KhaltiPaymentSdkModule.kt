@@ -1,50 +1,115 @@
 package expo.modules.khaltipaymentsdk
 
+import android.util.Log
+import com.khalti.checkout.helper.Config
+import com.khalti.checkout.helper.KhaltiCheckOut
+import com.khalti.checkout.helper.OnCancelListener
+import com.khalti.checkout.helper.OnCheckOutListener
+import com.khalti.checkout.helper.PaymentPreference
+import expo.modules.kotlin.Promise
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import java.net.URL
+import expo.modules.kotlin.records.Field
+import expo.modules.kotlin.records.Record
 
 class KhaltiPaymentSdkModule : Module() {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
+
+  private var checkout: KhaltiCheckOut? = null
+
   override fun definition() = ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('KhaltiPaymentSdk')` in JavaScript.
     Name("KhaltiPaymentSdk")
 
-    // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-    Constants(
-      "PI" to Math.PI
-    )
+    Events("onPaymentSuccess", "onPaymentError", "onPaymentCancel")
 
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
+    AsyncFunction("startPayment") { args: PaymentArgs, promise: Promise ->
+      val currentActivity =
+              appContext.currentActivity
+                      ?: run {
+                        promise.reject("ERR_NO_ACTIVITY", "No current activity", null)
+                        return@AsyncFunction
+                      }
 
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      "Hello world! 👋"
-    }
+      try {
+        val config =
+                Config.Builder(
+                                args.publicKey,
+                                args.productId,
+                                args.productName,
+                                args.amount.toLong(), // Convert Double to Long for paisa
+                                object : OnCheckOutListener {
+                                  override fun onSuccess(data: Map<String, Any>) {
+                                    Log.d("KhaltiPayment", "Payment successful: $data")
+                                    sendEvent("onPaymentSuccess", data)
+                                    promise.resolve(data)
+                                  }
 
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { value: String ->
-      // Send an event to JavaScript.
-      sendEvent("onChange", mapOf(
-        "value" to value
-      ))
-    }
+                                  override fun onError(
+                                          action: String,
+                                          errorMap: Map<String, String>
+                                  ) {
+                                    Log.e(
+                                            "KhaltiPayment",
+                                            "Payment error - Action: $action, Error: $errorMap"
+                                    )
+                                    val errorData =
+                                            mapOf("action" to action, "errorMap" to errorMap)
+                                    sendEvent("onPaymentError", errorData)
+                                    promise.reject(
+                                            "PAYMENT_ERROR",
+                                            "Payment was unsuccessful: $errorMap",
+                                            null
+                                    )
+                                  }
+                                }
+                        )
+                        // .paymentPreferences(listOf(PaymentPreference.KHALTI, PaymentPreference.MOBILE,))
+                        .onCancel(
+                                object : OnCancelListener {
+                                  override fun onCancel() {
+                                    Log.d("KhaltiPayment", "Payment cancelled by user")
+                                    sendEvent("onPaymentCancel", null)
+                                    promise.reject(
+                                            "PAYMENT_CANCELED",
+                                            "Payment cancelled by the user",
+                                            null
+                                    )
+                                  }
+                                }
+                        )
 
-    // Enables the module to be used as a native view. Definition components that are accepted as part of
-    // the view definition: Prop, Events.
-    View(KhaltiPaymentSdkView::class) {
-      // Defines a setter for the `url` prop.
-      Prop("url") { view: KhaltiPaymentSdkView, url: URL ->
-        view.webView.loadUrl(url.toString())
+        // Add optional parameters if provided
+        args.productUrl?.let { config.productUrl(it) }
+        args.additionalData?.let { config.additionalData(it) }
+
+        val finalConfig = config.build()
+
+        checkout = KhaltiCheckOut(currentActivity, finalConfig)
+        checkout?.show()
+      } catch (e: Exception) {
+        Log.e("KhaltiPayment", "Error initializing payment: ${e.message}")
+        promise.reject("ERR_PAYMENT_INIT", "Failed to initialize payment: ${e.message}", e)
       }
-      // Defines an event that the view can send to JavaScript.
-      Events("onLoad")
     }
+  }
+
+  // Helper data class to receive structured args
+  class PaymentArgs : Record {
+    @Field
+    val publicKey: String = ""
+    
+    @Field
+    val productId: String = ""
+    
+    @Field
+    val productName: String = ""
+    
+    @Field
+    val amount: Double = 0.0
+    
+    @Field
+    val productUrl: String? = null
+    
+    @Field
+    val additionalData: Map<String, Any>? = null
   }
 }

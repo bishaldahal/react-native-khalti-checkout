@@ -1,7 +1,7 @@
 {
   "name": "khalti-payment-sdk",
-  "version": "0.1.0",
-  "description": "React Native SDK for Khalti",
+  "version": "1.0.0",
+  "description": "A comprehensive React Native/Expo SDK for integrating Khalti Payment Gateway into your mobile applications. Accept payments from Khalti users, eBanking users, mobile banking users, and card holders in Nepal.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
@@ -18,16 +18,44 @@
   "keywords": [
     "react-native",
     "expo",
-    "khalti-payment-sdk",
-    "KhaltiPaymentSdk"
+    "khalti",
+    "payment",
+    "payment-gateway",
+    "nepal",
+    "mobile-payment",
+    "ebanking",
+    "khalti-payment",
+    "khalti-sdk",
+    "android",
+    "typescript",
+    "expo-module"
   ],
-  "repository": "https://github.com/bishaldahal/khalti-payment-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bishaldahal/khalti-payment-sdk.git"
+  },
   "bugs": {
     "url": "https://github.com/bishaldahal/khalti-payment-sdk/issues"
   },
-  "author": "Bishal Dahal <bishaldahal@duck.com> (https://github.com/bishaldahal)",
+  "author": {
+    "name": "Bishal Dahal",
+    "email": "bishaldahal@duck.com",
+    "url": "https://github.com/bishaldahal"
+  },
   "license": "MIT",
   "homepage": "https://github.com/bishaldahal/khalti-payment-sdk#readme",
+  "files": [
+    "build",
+    "android",
+    "ios",
+    "src",
+    "expo-module.config.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
   "dependencies": {
     "expo-modules-core": "^2.4.2"
   },
@@ -41,5 +69,8 @@
     "expo": "*",
     "react": "*",
     "react-native": "*"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

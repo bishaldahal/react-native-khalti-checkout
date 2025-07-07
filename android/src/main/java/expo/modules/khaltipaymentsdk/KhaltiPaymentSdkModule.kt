@@ -17,7 +17,7 @@ import expo.modules.kotlin.records.Record
  * This module provides React Native interface for Khalti's checkout-android SDK,
  * enabling seamless payment processing for Nepalese merchants.
  * 
- * @author Your Name
+ * @author Bishal Dahal
  * @version 1.0.0
  */
 class KhaltiPaymentSdkModule : Module() {

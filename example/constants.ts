@@ -52,6 +52,13 @@ export const COLORS = {
   TEXT_PRIMARY: "#1a1a1a",
   TEXT_SECONDARY: "#6c757d",
   TEXT_MUTED: "#adb5bd",
+  // Semantic colors for specific UI elements
+  PRIMARY_LIGHT: "#f8f4ff",
+  ERROR_LIGHT: "#fff5f5",
+  INFO_LIGHT: "#e8f4fd",
+  INFO_BORDER: "#bee5eb",
+  INFO_TEXT: "#0c5460",
+  SWITCH_THUMB_INACTIVE: "#f4f3f4",
 } as const;
 
 // Status messages
@@ -60,8 +67,7 @@ export const STATUS_MESSAGES = {
   VALIDATING: "🔄 Validating payment details...",
   CALLING_API: "🌐 Calling Khalti API to initiate payment...",
   OPENING_SDK: "📱 Opening Khalti payment interface...",
-  PAYMENT_WINDOW_OPENED:
-    "⏳ Payment window opened. Complete payment in the Khalti interface.",
+  PAYMENT_WINDOW_OPENED: "⏳ Payment window opened. Complete payment in the Khalti interface.",
   READY_FOR_NEXT: "Ready for next payment",
   READY_TO_RETRY: "Ready to retry payment",
   READY_FOR_NEW: "Ready for new payment",
@@ -71,15 +77,16 @@ export const STATUS_MESSAGES = {
 export const ERROR_MESSAGES = {
   VALIDATION_FAILED: "Validation failed",
   AMOUNT_REQUIRED: "Amount is required",
-  AMOUNT_INVALID: `Please enter a valid amount between ${PAYMENT_LIMITS.MIN_AMOUNT} and ${PAYMENT_LIMITS.MAX_AMOUNT.toLocaleString()} paisa`,
+  AMOUNT_INVALID: `Please enter a valid amount between ${
+    PAYMENT_LIMITS.MIN_AMOUNT
+  } and ${PAYMENT_LIMITS.MAX_AMOUNT.toLocaleString()} paisa`,
   ORDER_ID_REQUIRED: "Order ID is required",
   ORDER_ID_TOO_SHORT: `Order ID must be at least ${PAYMENT_LIMITS.MIN_ORDER_ID_LENGTH} characters long`,
   ORDER_NAME_REQUIRED: "Order name is required",
   ORDER_NAME_TOO_SHORT: `Order name must be at least ${PAYMENT_LIMITS.MIN_ORDER_NAME_LENGTH} characters long`,
   EMAIL_INVALID: "Please enter a valid email address",
   PHONE_INVALID: "Please enter a valid Nepal mobile number (9XXXXXXXX)",
-  SECRET_KEY_REQUIRED:
-    "Secret key is required. Please configure your Khalti credentials.",
+  SECRET_KEY_REQUIRED: "Secret key is required. Please configure your Khalti credentials.",
   UNEXPECTED_ERROR: "An unexpected error occurred",
 } as const;
 
@@ -89,8 +96,7 @@ export const INFO_MESSAGES = {
   ORDER_ID_INFO: "Unique identifier for this order",
   ORDER_NAME_INFO: "Description of what the customer is purchasing",
   PHONE_INFO: "Nepal mobile number format: 9XXXXXXXX",
-  PRODUCTION_WARNING:
-    "⚠️ In production, API calls should be made from your secure backend server",
+  PRODUCTION_WARNING: "⚠️ In production, API calls should be made from your secure backend server",
 } as const;
 
 // Alert titles and messages

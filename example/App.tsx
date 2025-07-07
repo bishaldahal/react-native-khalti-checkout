@@ -87,25 +87,15 @@ export default function App() {
   const [config, setConfig] = useState<KhaltiConfig>(DEFAULT_TEST_CONFIG);
 
   // Payment form state
-  const [paymentStatus, setPaymentStatus] = useState<string>(
-    STATUS_MESSAGES.READY
-  );
+  const [paymentStatus, setPaymentStatus] = useState<string>(STATUS_MESSAGES.READY);
   const [amount, setAmount] = useState<string>(DEFAULT_FORM_VALUES.AMOUNT);
   const [orderId, setOrderId] = useState<string>(generateOrderId());
-  const [orderName, setOrderName] = useState<string>(
-    DEFAULT_FORM_VALUES.ORDER_NAME
-  );
+  const [orderName, setOrderName] = useState<string>(DEFAULT_FORM_VALUES.ORDER_NAME);
 
   // Customer info state
-  const [customerName, setCustomerName] = useState<string>(
-    DEFAULT_FORM_VALUES.CUSTOMER_NAME
-  );
-  const [customerEmail, setCustomerEmail] = useState<string>(
-    DEFAULT_FORM_VALUES.CUSTOMER_EMAIL
-  );
-  const [customerPhone, setCustomerPhone] = useState<string>(
-    DEFAULT_FORM_VALUES.CUSTOMER_PHONE
-  );
+  const [customerName, setCustomerName] = useState<string>(DEFAULT_FORM_VALUES.CUSTOMER_NAME);
+  const [customerEmail, setCustomerEmail] = useState<string>(DEFAULT_FORM_VALUES.CUSTOMER_EMAIL);
+  const [customerPhone, setCustomerPhone] = useState<string>(DEFAULT_FORM_VALUES.CUSTOMER_PHONE);
 
   // UI state
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -180,9 +170,11 @@ export default function App() {
   useEffect(() => {
     setOrderId(generateOrderId());
 
-    const successSubscription = KhaltiPaymentSdk.onPaymentSuccess((payload) => {
+    const successSubscription = KhaltiPaymentSdk.onPaymentSuccess(payload => {
       try {
-        const message = `✅ Payment Successful!\n\nPIDX: ${payload.pidx}\nStatus: ${payload.status}\nTimestamp: ${new Date(payload.timestamp || Date.now()).toLocaleString()}`;
+        const message = `✅ Payment Successful!\n\nPIDX: ${payload.pidx}\nStatus: ${
+          payload.status
+        }\nTimestamp: ${new Date(payload.timestamp || Date.now()).toLocaleString()}`;
         setPaymentStatus(message);
         Alert.alert(ALERTS.PAYMENT_SUCCESS, message, [
           {
@@ -197,9 +189,11 @@ export default function App() {
       }
     });
 
-    const errorSubscription = KhaltiPaymentSdk.onPaymentError((payload) => {
+    const errorSubscription = KhaltiPaymentSdk.onPaymentError(payload => {
       try {
-        const message = `❌ Payment Failed\n\nError: ${payload.error}\nDetails: ${payload.details || "No additional details"}\nTimestamp: ${new Date(payload.timestamp || Date.now()).toLocaleString()}`;
+        const message = `❌ Payment Failed\n\nError: ${payload.error}\nDetails: ${
+          payload.details || "No additional details"
+        }\nTimestamp: ${new Date(payload.timestamp || Date.now()).toLocaleString()}`;
         setPaymentStatus(message);
         Alert.alert(ALERTS.PAYMENT_ERROR, message, [
           {
@@ -214,9 +208,11 @@ export default function App() {
       }
     });
 
-    const cancelSubscription = KhaltiPaymentSdk.onPaymentCancel((payload) => {
+    const cancelSubscription = KhaltiPaymentSdk.onPaymentCancel(payload => {
       try {
-        const message = `⚠️ Payment Cancelled\n\nReason: ${payload?.reason || "User cancelled the payment"}\nTimestamp: ${new Date(payload?.timestamp || Date.now()).toLocaleString()}`;
+        const message = `⚠️ Payment Cancelled\n\nReason: ${
+          payload?.reason || "User cancelled the payment"
+        }\nTimestamp: ${new Date(payload?.timestamp || Date.now()).toLocaleString()}`;
         setPaymentStatus(message);
         Alert.alert(ALERTS.PAYMENT_CANCELLED, message, [
           {
@@ -249,9 +245,7 @@ export default function App() {
   const initiatePaymentWithKhalti = useCallback(
     async (paymentData: PaymentInitRequest): Promise<string> => {
       if (!config.secretKey) {
-        throw new Error(
-          "Secret key is required. Please configure your Khalti credentials."
-        );
+        throw new Error("Secret key is required. Please configure your Khalti credentials.");
       }
 
       try {
@@ -290,8 +284,7 @@ export default function App() {
           let errorMessage = `API Error (${response.status})`;
           try {
             const errorData = JSON.parse(errorText);
-            errorMessage =
-              errorData.detail || errorData.message || errorMessage;
+            errorMessage = errorData.detail || errorData.message || errorMessage;
           } catch {
             errorMessage = errorText || errorMessage;
           }
@@ -309,8 +302,7 @@ export default function App() {
         return data.pidx;
       } catch (error) {
         console.error("💥 Khalti payment initiation failed:", error);
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+        const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
         throw new Error(`Failed to initiate payment: ${errorMessage}`);
       }
     },
@@ -326,7 +318,7 @@ export default function App() {
       const errors = validateForm();
       if (Object.keys(errors).length > 0) {
         const errorMessages = [
-          ...Object.values(errors).filter((error) => typeof error === "string"),
+          ...Object.values(errors).filter(error => typeof error === "string"),
           ...(errors.config || []),
         ];
         throw new Error(`Validation failed:\n${errorMessages.join("\n")}`);
@@ -342,8 +334,7 @@ export default function App() {
         amount: parseInt(amount, 10),
         purchase_order_id: orderId.trim(),
         purchase_order_name: orderName.trim(),
-        customer_info:
-          Object.keys(customerInfo).length > 0 ? customerInfo : undefined,
+        customer_info: Object.keys(customerInfo).length > 0 ? customerInfo : undefined,
       };
 
       console.log("💳 Starting payment process with data:", paymentData);
@@ -366,13 +357,10 @@ export default function App() {
       // Start payment with the obtained pidx
       await KhaltiPaymentSdk.startPayment(paymentArgs);
 
-      setPaymentStatus(
-        "⏳ Payment window opened. Complete payment in the Khalti interface."
-      );
+      setPaymentStatus("⏳ Payment window opened. Complete payment in the Khalti interface.");
     } catch (error) {
       console.error("💥 Payment error:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "An unexpected error occurred";
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
 
       setPaymentStatus(`❌ Error: ${errorMessage}`);
       setIsLoading(false);
@@ -419,11 +407,7 @@ export default function App() {
     (value: boolean) => {
       setIsTestMode(value);
       if (!value && (!config.publicKey || !config.secretKey)) {
-        Alert.alert(
-          ALERTS.PRODUCTION_MODE,
-          ALERTS.PRODUCTION_MODE_MESSAGE,
-          [{ text: "OK" }]
-        );
+        Alert.alert(ALERTS.PRODUCTION_MODE, ALERTS.PRODUCTION_MODE_MESSAGE, [{ text: "OK" }]);
       }
     },
     [config.publicKey, config.secretKey]
@@ -431,11 +415,8 @@ export default function App() {
 
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
-      <SafeAreaView
-        style={styles.container}
-        edges={["top", "left", "right", "bottom"]}
-      >
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.BACKGROUND} />
+      <SafeAreaView style={styles.container} edges={["top", "left", "right", "bottom"]}>
         <KeyboardAvoidingView
           style={styles.flex}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -458,17 +439,10 @@ export default function App() {
             </View>
 
             {/* Status Display */}
-            <View
-              style={[
-                styles.statusContainer,
-                isLoading && styles.statusLoading,
-              ]}
-            >
+            <View style={[styles.statusContainer, isLoading && styles.statusLoading]}>
               <View style={styles.statusHeader}>
                 <Text style={styles.statusLabel}>Status</Text>
-                {isLoading && (
-                  <ActivityIndicator size="small" color="#5C2D91" />
-                )}
+                {isLoading && <ActivityIndicator size="small" color={COLORS.PRIMARY} />}
               </View>
               <Text style={styles.statusText}>{paymentStatus}</Text>
               {amountInNPR > 0 && (
@@ -484,24 +458,21 @@ export default function App() {
                 <View style={styles.switchLabelContainer}>
                   <Text style={styles.switchLabel}>Test Mode</Text>
                   <Text style={styles.switchDescription}>
-                    {isTestMode
-                      ? "Safe testing environment"
-                      : "Live production mode"}
+                    {isTestMode ? "Safe testing environment" : "Live production mode"}
                   </Text>
                 </View>
                 <Switch
                   value={isTestMode}
                   onValueChange={handleTestModeToggle}
-                  trackColor={{ false: "#767577", true: "#5C2D91" }}
-                  thumbColor={isTestMode ? "#ffffff" : "#f4f3f4"}
+                  trackColor={{ false: COLORS.TEXT_SECONDARY, true: COLORS.PRIMARY }}
+                  thumbColor={isTestMode ? COLORS.WHITE : COLORS.SWITCH_THUMB_INACTIVE}
                   accessibilityLabel="Toggle test mode"
                 />
               </View>
 
               <View style={styles.environmentDisplay}>
                 <Text style={styles.environmentText}>
-                  Current Environment:{" "}
-                  <Text style={styles.bold}>{config.environment}</Text>
+                  Current Environment: <Text style={styles.bold}>{config.environment}</Text>
                 </Text>
                 {formErrors.config && (
                   <View style={styles.errorContainer}>
@@ -517,7 +488,9 @@ export default function App() {
               <TouchableOpacity
                 style={styles.configButton}
                 onPress={() => setShowAdvancedConfig(!showAdvancedConfig)}
-                accessibilityLabel={`${showAdvancedConfig ? "Hide" : "Show"} advanced configuration`}
+                accessibilityLabel={`${
+                  showAdvancedConfig ? "Hide" : "Show"
+                } advanced configuration`}
               >
                 <Text style={styles.configButtonText}>
                   {showAdvancedConfig ? "Hide" : "Show"} Advanced Configuration
@@ -531,12 +504,8 @@ export default function App() {
                 <InputField
                   label="Public Key"
                   value={config.publicKey}
-                  onChangeText={(text) =>
-                    setConfig((prev) => ({ ...prev, publicKey: text }))
-                  }
-                  placeholder={
-                    isTestMode ? "test_public_key" : "live_public_key"
-                  }
+                  onChangeText={text => setConfig(prev => ({ ...prev, publicKey: text }))}
+                  placeholder={isTestMode ? "test_public_key" : "live_public_key"}
                   secureTextEntry={false}
                   required
                 />
@@ -544,12 +513,8 @@ export default function App() {
                 <InputField
                   label="Secret Key"
                   value={config.secretKey}
-                  onChangeText={(text) =>
-                    setConfig((prev) => ({ ...prev, secretKey: text }))
-                  }
-                  placeholder={
-                    isTestMode ? "test_secret_key" : "live_secret_key"
-                  }
+                  onChangeText={text => setConfig(prev => ({ ...prev, secretKey: text }))}
+                  placeholder={isTestMode ? "test_secret_key" : "live_secret_key"}
                   secureTextEntry={true}
                   required
                   warning="⚠️ In production, API calls should be made from your backend server"
@@ -558,9 +523,7 @@ export default function App() {
                 <InputField
                   label="Return URL"
                   value={config.returnUrl}
-                  onChangeText={(text) =>
-                    setConfig((prev) => ({ ...prev, returnUrl: text }))
-                  }
+                  onChangeText={text => setConfig(prev => ({ ...prev, returnUrl: text }))}
                   placeholder="https://yourwebsite.com/payment/"
                   autoCapitalize="none"
                   required
@@ -569,9 +532,7 @@ export default function App() {
                 <InputField
                   label="Website URL"
                   value={config.websiteUrl}
-                  onChangeText={(text) =>
-                    setConfig((prev) => ({ ...prev, websiteUrl: text }))
-                  }
+                  onChangeText={text => setConfig(prev => ({ ...prev, websiteUrl: text }))}
                   placeholder="https://yourwebsite.com"
                   autoCapitalize="none"
                   required
@@ -587,7 +548,9 @@ export default function App() {
                 onChangeText={setAmount}
                 placeholder="1000 (= NPR 10.00)"
                 keyboardType="numeric"
-                info={`100 paisa = 1 NPR • Max: ${(PAYMENT_LIMITS.MAX_AMOUNT / 100).toLocaleString()} NPR`}
+                info={`100 paisa = 1 NPR • Max: ${(
+                  PAYMENT_LIMITS.MAX_AMOUNT / 100
+                ).toLocaleString()} NPR`}
                 required
                 error={formErrors.amount}
               />
@@ -663,14 +626,12 @@ export default function App() {
                 onPress={startPayment}
                 disabled={isLoading || !isFormValid}
                 accessibilityLabel={
-                  isFormValid
-                    ? "Start payment process"
-                    : "Fix form errors to enable payment"
+                  isFormValid ? "Start payment process" : "Fix form errors to enable payment"
                 }
               >
                 {isLoading ? (
                   <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="small" color="#fff" />
+                    <ActivityIndicator size="small" color={COLORS.WHITE} />
                     <Text style={styles.primaryButtonText}>Processing...</Text>
                   </View>
                 ) : (
@@ -692,15 +653,14 @@ export default function App() {
 
               <Text style={styles.infoTitle}>🔒 Security Note:</Text>
               <Text style={styles.infoText}>
-                This demo calls Khalti API directly from the app for testing
-                purposes. In production, payment initiation should be done from
-                your backend server.
+                This demo calls Khalti API directly from the app for testing purposes. In
+                production, payment initiation should be done from your backend server.
               </Text>
 
               <Text style={styles.infoTitle}>📱 Supported Platforms:</Text>
               <Text style={styles.infoText}>
-                • iOS 12.0 and above{"\n"}• Android API 21 and above{"\n"}• Web
-                browsers with modern JavaScript support
+                • iOS 12.0 and above{"\n"}• Android API 21 and above{"\n"}• Web browsers with modern
+                JavaScript support
               </Text>
             </View>
           </ScrollView>
@@ -711,13 +671,7 @@ export default function App() {
 }
 
 // Enhanced helper components
-function ConfigGroup({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function ConfigGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View style={styles.group}>
       <Text style={styles.groupHeader}>{title}</Text>
@@ -772,9 +726,7 @@ function InputField({
       />
       {error && <Text style={styles.errorText}>{error}</Text>}
       {info && !error && <Text style={styles.infoTextSmall}>{info}</Text>}
-      {warning && !error && (
-        <Text style={styles.warningTextSmall}>{warning}</Text>
-      )}
+      {warning && !error && <Text style={styles.warningTextSmall}>{warning}</Text>}
     </View>
   );
 }
@@ -802,24 +754,24 @@ const styles = {
     fontSize: 32,
     fontWeight: "700" as const,
     textAlign: "center" as const,
-    color: "#1a1a1a",
+    color: COLORS.TEXT_PRIMARY,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 18,
     textAlign: "center" as const,
-    color: "#6c757d",
+    color: COLORS.TEXT_SECONDARY,
     marginBottom: 12,
   },
   versionBadge: {
-    backgroundColor: "#e9ecef",
+    backgroundColor: COLORS.LIGHT,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
   },
   versionText: {
     fontSize: 12,
-    color: "#6c757d",
+    color: COLORS.TEXT_SECONDARY,
     fontWeight: "500" as const,
   },
 
@@ -827,18 +779,18 @@ const styles = {
   statusContainer: {
     margin: 16,
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.WHITE,
     borderRadius: 12,
     borderLeftWidth: 4,
-    borderLeftColor: "#5C2D91",
-    shadowColor: "#000",
+    borderLeftColor: COLORS.PRIMARY,
+    shadowColor: COLORS.DARK,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 4,
   },
   statusLoading: {
-    borderLeftColor: "#ffc107",
+    borderLeftColor: COLORS.WARNING,
   },
   statusHeader: {
     flexDirection: "row" as const,
@@ -849,19 +801,19 @@ const styles = {
   statusLabel: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#1a1a1a",
+    color: COLORS.TEXT_PRIMARY,
   },
   statusText: {
     fontSize: 14,
-    color: "#495057",
+    color: COLORS.TEXT_SECONDARY,
     lineHeight: 22,
     marginBottom: 8,
   },
   amountPreview: {
     fontSize: 14,
-    color: "#5C2D91",
+    color: COLORS.PRIMARY,
     fontWeight: "600" as const,
-    backgroundColor: "#f8f4ff",
+    backgroundColor: COLORS.PRIMARY_LIGHT,
     padding: 8,
     borderRadius: 6,
     textAlign: "center" as const,
@@ -870,10 +822,10 @@ const styles = {
   // Group styles
   group: {
     margin: 16,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.WHITE,
     borderRadius: 12,
     padding: 20,
-    shadowColor: "#000",
+    shadowColor: COLORS.DARK,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -883,7 +835,7 @@ const styles = {
     fontSize: 20,
     fontWeight: "700" as const,
     marginBottom: 20,
-    color: "#1a1a1a",
+    color: COLORS.TEXT_PRIMARY,
   },
 
   // Form styles
@@ -894,24 +846,24 @@ const styles = {
     fontSize: 16,
     fontWeight: "600" as const,
     marginBottom: 8,
-    color: "#1a1a1a",
+    color: COLORS.TEXT_PRIMARY,
   },
   requiredMark: {
-    color: "#dc3545",
+    color: COLORS.ERROR,
     fontWeight: "700" as const,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#dee2e6",
+    borderColor: COLORS.BORDER,
     borderRadius: 8,
     padding: 14,
     fontSize: 16,
-    backgroundColor: "#fff",
-    color: "#1a1a1a",
+    backgroundColor: COLORS.WHITE,
+    color: COLORS.TEXT_PRIMARY,
   },
   inputError: {
-    borderColor: "#dc3545",
-    backgroundColor: "#fff5f5",
+    borderColor: COLORS.ERROR,
+    backgroundColor: COLORS.ERROR_LIGHT,
   },
 
   // Switch styles
@@ -929,12 +881,12 @@ const styles = {
   switchLabel: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#1a1a1a",
+    color: COLORS.TEXT_PRIMARY,
     marginBottom: 4,
   },
   switchDescription: {
     fontSize: 14,
-    color: "#6c757d",
+    color: COLORS.TEXT_SECONDARY,
   },
 
   // Environment styles
@@ -943,25 +895,25 @@ const styles = {
   },
   environmentText: {
     fontSize: 16,
-    color: "#1a1a1a",
+    color: COLORS.TEXT_PRIMARY,
     marginBottom: 8,
   },
   bold: {
     fontWeight: "700" as const,
-    color: "#5C2D91",
+    color: COLORS.PRIMARY,
   },
 
   // Button styles
   configButton: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: COLORS.LIGHT,
     padding: 14,
     borderRadius: 8,
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: "#dee2e6",
+    borderColor: COLORS.BORDER,
   },
   configButtonText: {
-    color: "#5C2D91",
+    color: COLORS.PRIMARY,
     fontSize: 14,
     fontWeight: "600" as const,
   },
@@ -979,24 +931,24 @@ const styles = {
     minHeight: 50,
   },
   primaryButton: {
-    backgroundColor: "#5C2D91",
+    backgroundColor: COLORS.PRIMARY,
   },
   secondaryButton: {
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.WHITE,
     borderWidth: 2,
-    borderColor: "#5C2D91",
+    borderColor: COLORS.PRIMARY,
   },
   buttonDisabled: {
-    backgroundColor: "#adb5bd",
+    backgroundColor: COLORS.TEXT_MUTED,
     opacity: 0.6,
   },
   primaryButtonText: {
-    color: "#fff",
+    color: COLORS.WHITE,
     fontSize: 16,
     fontWeight: "700" as const,
   },
   secondaryButtonText: {
-    color: "#5C2D91",
+    color: COLORS.PRIMARY,
     fontSize: 16,
     fontWeight: "600" as const,
   },
@@ -1010,49 +962,49 @@ const styles = {
   infoBox: {
     margin: 16,
     padding: 20,
-    backgroundColor: "#e8f4fd",
+    backgroundColor: COLORS.INFO_LIGHT,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#bee5eb",
+    borderColor: COLORS.INFO_BORDER,
   },
   infoTitle: {
     fontSize: 16,
     fontWeight: "700" as const,
-    color: "#0c5460",
+    color: COLORS.INFO_TEXT,
     marginBottom: 8,
     marginTop: 12,
   },
   infoText: {
     fontSize: 14,
-    color: "#0c5460",
+    color: COLORS.INFO_TEXT,
     lineHeight: 22,
     marginBottom: 8,
   },
 
   // Error and info text styles
   errorContainer: {
-    backgroundColor: "#fff5f5",
+    backgroundColor: COLORS.ERROR_LIGHT,
     padding: 12,
     borderRadius: 6,
     borderLeftWidth: 3,
-    borderLeftColor: "#dc3545",
+    borderLeftColor: COLORS.ERROR,
     marginTop: 8,
   },
   errorText: {
     fontSize: 12,
-    color: "#dc3545",
+    color: COLORS.ERROR,
     marginTop: 6,
     fontWeight: "500" as const,
   },
   infoTextSmall: {
     fontSize: 12,
-    color: "#6c757d",
+    color: COLORS.TEXT_SECONDARY,
     marginTop: 6,
     fontStyle: "italic" as const,
   },
   warningTextSmall: {
     fontSize: 12,
-    color: "#e67e22",
+    color: COLORS.WARNING,
     marginTop: 6,
     fontStyle: "italic" as const,
     fontWeight: "500" as const,

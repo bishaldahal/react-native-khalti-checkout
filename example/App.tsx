@@ -8,22 +8,29 @@ import {
   View,
   Switch,
   Platform,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect } from "react";
-import { getKhaltiApiUrl } from "./config";
-
-// Types
-type KhaltiEnvironment = "TEST" | "PROD";
-
-// Configuration for Khalti API
-interface KhaltiConfig {
-  publicKey: string;
-  secretKey: string;
-  environment: KhaltiEnvironment;
-  returnUrl: string;
-  websiteUrl: string;
-}
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { getKhaltiApiUrl, validateConfig, type KhaltiConfig } from "./config";
+import {
+  validateEmail,
+  validatePhone,
+  validateAmount,
+  generateOrderId,
+  paisaToNPR,
+  isEmpty,
+} from "./utils";
+import {
+  DEFAULT_FORM_VALUES,
+  PAYMENT_LIMITS,
+  ERROR_MESSAGES,
+  STATUS_MESSAGES,
+  ALERTS,
+  COLORS,
+} from "./constants";
 
 // Types for payment initiation
 interface PaymentInitRequest {
@@ -43,7 +50,16 @@ interface PaymentInitResponse {
   expires_at: string;
 }
 
-// Default test configurations
+interface FormErrors {
+  amount?: string;
+  orderId?: string;
+  orderName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  config?: string[];
+}
+
+// Enhanced default configurations
 const DEFAULT_TEST_CONFIG: KhaltiConfig = {
   publicKey: "b9288a8a24c144e389d012ce992eea58",
   secretKey: "8472e5a3a43541e6ba54e623d17f8c95",
@@ -60,6 +76,11 @@ const DEFAULT_PROD_CONFIG: KhaltiConfig = {
   websiteUrl: "https://yourwebsite.com",
 };
 
+/**
+ * Main App Component - Khalti Payment SDK Demo
+ *
+ * This component demonstrates the integration of Khalti Payment SDK
+ */
 export default function App() {
   // Configuration state
   const [isTestMode, setIsTestMode] = useState<boolean>(true);
@@ -67,413 +88,629 @@ export default function App() {
 
   // Payment form state
   const [paymentStatus, setPaymentStatus] = useState<string>(
-    "Ready to test payments"
+    STATUS_MESSAGES.READY
   );
-  const [amount, setAmount] = useState<string>("1000"); // Amount in paisa
-  const [orderId, setOrderId] = useState<string>(`ORDER_${Date.now()}`);
-  const [orderName, setOrderName] = useState<string>("Test Product");
+  const [amount, setAmount] = useState<string>(DEFAULT_FORM_VALUES.AMOUNT);
+  const [orderId, setOrderId] = useState<string>(generateOrderId());
+  const [orderName, setOrderName] = useState<string>(
+    DEFAULT_FORM_VALUES.ORDER_NAME
+  );
 
   // Customer info state
-  const [customerName, setCustomerName] = useState<string>("Test User");
-  const [customerEmail, setCustomerEmail] =
-    useState<string>("test@example.com");
-  const [customerPhone, setCustomerPhone] = useState<string>("9800000000");
+  const [customerName, setCustomerName] = useState<string>(
+    DEFAULT_FORM_VALUES.CUSTOMER_NAME
+  );
+  const [customerEmail, setCustomerEmail] = useState<string>(
+    DEFAULT_FORM_VALUES.CUSTOMER_EMAIL
+  );
+  const [customerPhone, setCustomerPhone] = useState<string>(
+    DEFAULT_FORM_VALUES.CUSTOMER_PHONE
+  );
 
   // UI state
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showAdvancedConfig, setShowAdvancedConfig] = useState<boolean>(false);
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
 
-  // Update config when test mode changes
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  const isFormValid = useMemo(() => {
+    return (
+      Object.keys(formErrors).length === 0 &&
+      config.publicKey.trim() !== "" &&
+      amount.trim() !== "" &&
+      orderId.trim() !== "" &&
+      orderName.trim() !== ""
+    );
+  }, [formErrors, config.publicKey, amount, orderId, orderName]);
+
+  const amountInNPR = useMemo(() => {
+    return paisaToNPR(amount);
+  }, [amount]);
+
+  const validateForm = useCallback((): FormErrors => {
+    const errors: FormErrors = {};
+
+    if (isEmpty(amount)) {
+      errors.amount = ERROR_MESSAGES.AMOUNT_REQUIRED;
+    } else if (!validateAmount(amount)) {
+      errors.amount = ERROR_MESSAGES.AMOUNT_INVALID;
+    }
+
+    if (isEmpty(orderId)) {
+      errors.orderId = ERROR_MESSAGES.ORDER_ID_REQUIRED;
+    } else if (orderId.trim().length < PAYMENT_LIMITS.MIN_ORDER_ID_LENGTH) {
+      errors.orderId = ERROR_MESSAGES.ORDER_ID_TOO_SHORT;
+    }
+
+    if (isEmpty(orderName)) {
+      errors.orderName = ERROR_MESSAGES.ORDER_NAME_REQUIRED;
+    } else if (orderName.trim().length < PAYMENT_LIMITS.MIN_ORDER_NAME_LENGTH) {
+      errors.orderName = ERROR_MESSAGES.ORDER_NAME_TOO_SHORT;
+    }
+
+    if (!isEmpty(customerEmail) && !validateEmail(customerEmail.trim())) {
+      errors.customerEmail = ERROR_MESSAGES.EMAIL_INVALID;
+    }
+
+    if (!isEmpty(customerPhone) && !validatePhone(customerPhone.trim())) {
+      errors.customerPhone = ERROR_MESSAGES.PHONE_INVALID;
+    }
+
+    // Config validation
+    const configValidation = validateConfig(config);
+    if (!configValidation.isValid) {
+      errors.config = configValidation.errors;
+    }
+
+    return errors;
+  }, [amount, orderId, orderName, customerEmail, customerPhone, config]);
+
   useEffect(() => {
-    setConfig(isTestMode ? DEFAULT_TEST_CONFIG : DEFAULT_PROD_CONFIG);
+    const errors = validateForm();
+    setFormErrors(errors);
+  }, [validateForm]);
+
+  useEffect(() => {
+    const newConfig = isTestMode ? DEFAULT_TEST_CONFIG : DEFAULT_PROD_CONFIG;
+    setConfig(newConfig);
   }, [isTestMode]);
 
+  // Initialize component and set up event listeners
   useEffect(() => {
-    // Generate new order ID when component mounts
-    setOrderId(`ORDER_${Date.now()}`);
+    setOrderId(generateOrderId());
 
-    // Subscribe to payment events
     const successSubscription = KhaltiPaymentSdk.onPaymentSuccess((payload) => {
-      const message = `Payment successful!\nPIDX: ${payload.pidx}\nStatus: ${payload.status}`;
-      setPaymentStatus(message);
-      Alert.alert("✅ Payment Success", message);
-      setIsLoading(false);
+      try {
+        const message = `✅ Payment Successful!\n\nPIDX: ${payload.pidx}\nStatus: ${payload.status}\nTimestamp: ${new Date(payload.timestamp || Date.now()).toLocaleString()}`;
+        setPaymentStatus(message);
+        Alert.alert(ALERTS.PAYMENT_SUCCESS, message, [
+          {
+            text: "OK",
+            onPress: () => setPaymentStatus("Ready for next payment"),
+          },
+        ]);
+      } catch (error) {
+        console.error("Error handling payment success:", error);
+      } finally {
+        setIsLoading(false);
+      }
     });
 
     const errorSubscription = KhaltiPaymentSdk.onPaymentError((payload) => {
-      const message = `Payment failed: ${payload.error}`;
-      setPaymentStatus(message);
-      Alert.alert("❌ Payment Error", message);
-      setIsLoading(false);
+      try {
+        const message = `❌ Payment Failed\n\nError: ${payload.error}\nDetails: ${payload.details || "No additional details"}\nTimestamp: ${new Date(payload.timestamp || Date.now()).toLocaleString()}`;
+        setPaymentStatus(message);
+        Alert.alert(ALERTS.PAYMENT_ERROR, message, [
+          {
+            text: "OK",
+            onPress: () => setPaymentStatus("Ready to retry payment"),
+          },
+        ]);
+      } catch (error) {
+        console.error("Error handling payment error:", error);
+      } finally {
+        setIsLoading(false);
+      }
     });
 
-    const cancelSubscription = KhaltiPaymentSdk.onPaymentCancel(() => {
-      setPaymentStatus("Payment cancelled by user");
-      Alert.alert("⚠️ Payment Cancelled", "User cancelled the payment");
-      setIsLoading(false);
+    const cancelSubscription = KhaltiPaymentSdk.onPaymentCancel((payload) => {
+      try {
+        const message = `⚠️ Payment Cancelled\n\nReason: ${payload?.reason || "User cancelled the payment"}\nTimestamp: ${new Date(payload?.timestamp || Date.now()).toLocaleString()}`;
+        setPaymentStatus(message);
+        Alert.alert(ALERTS.PAYMENT_CANCELLED, message, [
+          {
+            text: "OK",
+            onPress: () => setPaymentStatus("Ready for new payment"),
+          },
+        ]);
+      } catch (error) {
+        console.error("Error handling payment cancellation:", error);
+      } finally {
+        setIsLoading(false);
+      }
     });
 
     // Cleanup subscriptions on unmount
     return () => {
-      successSubscription.remove();
-      errorSubscription.remove();
-      cancelSubscription.remove();
+      try {
+        successSubscription.remove();
+        errorSubscription.remove();
+        cancelSubscription.remove();
+      } catch (error) {
+        console.error("Error cleaning up subscriptions:", error);
+      }
     };
   }, []);
 
   /**
-   * Initiate payment by calling Khalti API
-   * In production, this should be done from your secure backend server
+   * Note: In production, this should be done from your backend server
    */
-  const initiatePaymentWithKhalti = async (
-    paymentData: PaymentInitRequest
-  ): Promise<string> => {
-    if (!config.secretKey) {
-      throw new Error(
-        "Secret key is required. Please configure your Khalti credentials."
-      );
-    }
+  const initiatePaymentWithKhalti = useCallback(
+    async (paymentData: PaymentInitRequest): Promise<string> => {
+      if (!config.secretKey) {
+        throw new Error(
+          "Secret key is required. Please configure your Khalti credentials."
+        );
+      }
 
-    try {
-      const KHALTI_API_URL = getKhaltiApiUrl(config.environment);
+      try {
+        const KHALTI_API_URL = getKhaltiApiUrl(config.environment);
 
-      console.log("Initiating payment with Khalti API...", {
-        ...paymentData,
-        environment: config.environment,
-        api_url: KHALTI_API_URL,
-      });
+        console.log("🚀 Initiating payment with Khalti API...", {
+          ...paymentData,
+          environment: config.environment,
+          api_url: KHALTI_API_URL,
+        });
 
-      const response = await fetch(KHALTI_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `key ${config.secretKey}`,
-        },
-        body: JSON.stringify({
+        const requestBody = {
           return_url: config.returnUrl,
           website_url: config.websiteUrl,
           amount: paymentData.amount,
           purchase_order_id: paymentData.purchase_order_id,
           purchase_order_name: paymentData.purchase_order_name,
           customer_info: paymentData.customer_info,
-        }),
-      });
+        };
 
-      console.log("Khalti API response status:", response.status);
+        const response = await fetch(KHALTI_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `key ${config.secretKey}`,
+          },
+          body: JSON.stringify(requestBody),
+        });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Khalti API error response:", errorText);
-        throw new Error(
-          `Khalti API error! status: ${response.status}, message: ${errorText}`
-        );
+        console.log("📡 Khalti API response status:", response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("❌ Khalti API error response:", errorText);
+
+          let errorMessage = `API Error (${response.status})`;
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage =
+              errorData.detail || errorData.message || errorMessage;
+          } catch {
+            errorMessage = errorText || errorMessage;
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        const data: PaymentInitResponse = await response.json();
+        console.log("✅ Khalti API response data:", data);
+
+        if (!data.pidx) {
+          throw new Error("Invalid response from Khalti: pidx not found");
+        }
+
+        return data.pidx;
+      } catch (error) {
+        console.error("💥 Khalti payment initiation failed:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error occurred";
+        throw new Error(`Failed to initiate payment: ${errorMessage}`);
       }
+    },
+    [config]
+  );
 
-      const data: PaymentInitResponse = await response.json();
-      console.log("Khalti API response data:", data);
-
-      if (!data.pidx) {
-        throw new Error("Invalid response from Khalti: pidx not found");
-      }
-
-      return data.pidx;
-    } catch (error) {
-      console.error("Khalti payment initiation failed:", error);
-      throw new Error(
-        `Failed to initiate payment with Khalti: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    }
-  };
-
-  const startPayment = async () => {
+  const startPayment = useCallback(async () => {
     try {
       setIsLoading(true);
-      setPaymentStatus("Initiating payment...");
+      setPaymentStatus("🔄 Validating payment details...");
 
-      // Validate required fields
-      if (!config.publicKey) {
-        throw new Error(
-          "Public key is required. Please configure your Khalti credentials."
-        );
+      // Validate form before proceeding
+      const errors = validateForm();
+      if (Object.keys(errors).length > 0) {
+        const errorMessages = [
+          ...Object.values(errors).filter((error) => typeof error === "string"),
+          ...(errors.config || []),
+        ];
+        throw new Error(`Validation failed:\n${errorMessages.join("\n")}`);
       }
 
-      if (!amount || parseInt(amount) <= 0) {
-        throw new Error("Please enter a valid amount greater than 0");
-      }
-
-      if (!orderId.trim()) {
-        throw new Error("Order ID is required");
-      }
-
-      if (!orderName.trim()) {
-        throw new Error("Order name is required");
-      }
+      // Prepare customer info (only include non-empty values)
+      const customerInfo: PaymentInitRequest["customer_info"] = {};
+      if (customerName.trim()) customerInfo.name = customerName.trim();
+      if (customerEmail.trim()) customerInfo.email = customerEmail.trim();
+      if (customerPhone.trim()) customerInfo.phone = customerPhone.trim();
 
       const paymentData: PaymentInitRequest = {
-        amount: parseInt(amount),
+        amount: parseInt(amount, 10),
         purchase_order_id: orderId.trim(),
         purchase_order_name: orderName.trim(),
-        customer_info: {
-          name: customerName.trim() || undefined,
-          email: customerEmail.trim() || undefined,
-          phone: customerPhone.trim() || undefined,
-        },
+        customer_info:
+          Object.keys(customerInfo).length > 0 ? customerInfo : undefined,
       };
 
-      console.log("Starting payment process with data:", paymentData);
+      console.log("💳 Starting payment process with data:", paymentData);
 
       // Get pidx from Khalti API
-      setPaymentStatus("Calling Khalti API to initiate payment...");
+      setPaymentStatus("🌐 Calling Khalti API to initiate payment...");
       const pidx = await initiatePaymentWithKhalti(paymentData);
 
-      setPaymentStatus("Starting payment with Khalti SDK...");
+      setPaymentStatus("📱 Opening Khalti payment interface...");
 
-      // Create payment arguments
+      // Create payment arguments for SDK
       const paymentArgs: PaymentArgs = {
         publicKey: config.publicKey,
         pidx: pidx,
         environment: config.environment,
       };
 
-      console.log("Starting payment with arguments:", paymentArgs);
+      console.log("🎯 Starting payment with SDK arguments:", paymentArgs);
 
       // Start payment with the obtained pidx
-      const result = await KhaltiPaymentSdk.startPayment(paymentArgs);
+      await KhaltiPaymentSdk.startPayment(paymentArgs);
 
-      console.log("Payment initiated successfully:", result);
       setPaymentStatus(
-        "Payment window opened. Complete payment in the Khalti interface."
+        "⏳ Payment window opened. Complete payment in the Khalti interface."
       );
     } catch (error) {
-      console.error("Payment error:", error);
+      console.error("💥 Payment error:", error);
       const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      setPaymentStatus(`Error: ${errorMessage}`);
-      setIsLoading(false);
-      Alert.alert("Payment Error", errorMessage);
-    }
-  };
+        error instanceof Error ? error.message : "An unexpected error occurred";
 
-  const resetForm = () => {
+      setPaymentStatus(`❌ Error: ${errorMessage}`);
+      setIsLoading(false);
+
+      Alert.alert(ALERTS.PAYMENT_ERROR, errorMessage, [
+        {
+          text: "OK",
+          onPress: () => setPaymentStatus("Ready to retry payment"),
+        },
+      ]);
+    }
+  }, [
+    amount,
+    orderId,
+    orderName,
+    customerName,
+    customerEmail,
+    customerPhone,
+    config,
+    validateForm,
+    initiatePaymentWithKhalti,
+  ]);
+
+  /**
+   * Reset form to initial state
+   */
+  const resetForm = useCallback(() => {
     setAmount("1000");
-    setOrderId(`ORDER_${Date.now()}`);
+    setOrderId(generateOrderId());
     setOrderName("Test Product");
-    setCustomerName("Test User");
-    setCustomerEmail("test@example.com");
+    setCustomerName("John Doe");
+    setCustomerEmail("john@example.com");
     setCustomerPhone("9800000000");
     setPaymentStatus("Ready to test payments");
     setIsLoading(false);
-  };
+    setFormErrors({});
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+  }, []);
+
+  /**
+   * Handle test mode toggle with validation
+   */
+  const handleTestModeToggle = useCallback(
+    (value: boolean) => {
+      setIsTestMode(value);
+      if (!value && (!config.publicKey || !config.secretKey)) {
+        Alert.alert(
+          ALERTS.PRODUCTION_MODE,
+          "Please configure your production keys before switching to production mode.",
+          [{ text: "OK" }]
+        );
+      }
+    },
+    [config.publicKey, config.secretKey]
+  );
 
   return (
-    <SafeAreaView
-      style={styles.container}
-      edges={["top", "left", "right", "bottom"]}
-    >
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
+    <>
+      <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
+      <SafeAreaView
+        style={styles.container}
+        edges={["top", "left", "right", "bottom"]}
       >
-        <Text style={styles.header}>Khalti Payment SDK</Text>
-        <Text style={styles.subtitle}>Test Integration</Text>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <ScrollView
+            ref={scrollViewRef}
+            style={styles.scrollView}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Header Section */}
+            <View style={styles.headerSection}>
+              <Text style={styles.header}>Khalti Payment SDK</Text>
+              <Text style={styles.subtitle}>Integration Demo</Text>
+              <View style={styles.versionBadge}>
+                <Text style={styles.versionText}>
+                  v{require("../package.json").version} • {Platform.OS}
+                </Text>
+              </View>
+            </View>
 
-        {/* Status Display */}
-        <View style={styles.statusContainer}>
-          <Text style={styles.statusLabel}>Status:</Text>
-          <Text style={styles.statusText}>{paymentStatus}</Text>
-        </View>
+            {/* Status Display */}
+            <View
+              style={[
+                styles.statusContainer,
+                isLoading && styles.statusLoading,
+              ]}
+            >
+              <View style={styles.statusHeader}>
+                <Text style={styles.statusLabel}>Status</Text>
+                {isLoading && (
+                  <ActivityIndicator size="small" color="#5C2D91" />
+                )}
+              </View>
+              <Text style={styles.statusText}>{paymentStatus}</Text>
+              {amountInNPR > 0 && (
+                <Text style={styles.amountPreview}>
+                  Amount: {amount} paisa (NPR {amountInNPR.toFixed(2)})
+                </Text>
+              )}
+            </View>
 
-        {/* Environment Configuration */}
-        <ConfigGroup title="Environment Configuration">
-          <View style={styles.switchContainer}>
-            <Text style={styles.switchLabel}>Test Mode</Text>
-            <Switch
-              value={isTestMode}
-              onValueChange={(value) => {
-                setIsTestMode(value);
-                if (!value && (!config.publicKey || !config.secretKey)) {
-                  Alert.alert(
-                    "Production Mode",
-                    "Please configure your production keys before switching to production mode."
-                  );
+            {/* Environment Configuration */}
+            <ConfigGroup title="Environment Configuration">
+              <View style={styles.switchContainer}>
+                <View style={styles.switchLabelContainer}>
+                  <Text style={styles.switchLabel}>Test Mode</Text>
+                  <Text style={styles.switchDescription}>
+                    {isTestMode
+                      ? "Safe testing environment"
+                      : "Live production mode"}
+                  </Text>
+                </View>
+                <Switch
+                  value={isTestMode}
+                  onValueChange={handleTestModeToggle}
+                  trackColor={{ false: "#767577", true: "#5C2D91" }}
+                  thumbColor={isTestMode ? "#ffffff" : "#f4f3f4"}
+                  accessibilityLabel="Toggle test mode"
+                />
+              </View>
+
+              <View style={styles.environmentDisplay}>
+                <Text style={styles.environmentText}>
+                  Current Environment:{" "}
+                  <Text style={styles.bold}>{config.environment}</Text>
+                </Text>
+                {formErrors.config && (
+                  <View style={styles.errorContainer}>
+                    {formErrors.config.map((error, index) => (
+                      <Text key={index} style={styles.errorText}>
+                        • {error}
+                      </Text>
+                    ))}
+                  </View>
+                )}
+              </View>
+
+              <TouchableOpacity
+                style={styles.configButton}
+                onPress={() => setShowAdvancedConfig(!showAdvancedConfig)}
+                accessibilityLabel={`${showAdvancedConfig ? "Hide" : "Show"} advanced configuration`}
+              >
+                <Text style={styles.configButtonText}>
+                  {showAdvancedConfig ? "Hide" : "Show"} Advanced Configuration
+                </Text>
+              </TouchableOpacity>
+            </ConfigGroup>
+
+            {/* Advanced Configuration */}
+            {showAdvancedConfig && (
+              <ConfigGroup title="Khalti Configuration">
+                <InputField
+                  label="Public Key"
+                  value={config.publicKey}
+                  onChangeText={(text) =>
+                    setConfig((prev) => ({ ...prev, publicKey: text }))
+                  }
+                  placeholder={
+                    isTestMode ? "test_public_key" : "live_public_key"
+                  }
+                  secureTextEntry={false}
+                  required
+                />
+
+                <InputField
+                  label="Secret Key"
+                  value={config.secretKey}
+                  onChangeText={(text) =>
+                    setConfig((prev) => ({ ...prev, secretKey: text }))
+                  }
+                  placeholder={
+                    isTestMode ? "test_secret_key" : "live_secret_key"
+                  }
+                  secureTextEntry={true}
+                  required
+                  warning="⚠️ In production, API calls should be made from your backend server"
+                />
+
+                <InputField
+                  label="Return URL"
+                  value={config.returnUrl}
+                  onChangeText={(text) =>
+                    setConfig((prev) => ({ ...prev, returnUrl: text }))
+                  }
+                  placeholder="https://yourwebsite.com/payment/"
+                  autoCapitalize="none"
+                  required
+                />
+
+                <InputField
+                  label="Website URL"
+                  value={config.websiteUrl}
+                  onChangeText={(text) =>
+                    setConfig((prev) => ({ ...prev, websiteUrl: text }))
+                  }
+                  placeholder="https://yourwebsite.com"
+                  autoCapitalize="none"
+                  required
+                />
+              </ConfigGroup>
+            )}
+
+            {/* Payment Form */}
+            <ConfigGroup title="Payment Details">
+              <InputField
+                label="Amount (in paisa)"
+                value={amount}
+                onChangeText={setAmount}
+                placeholder="1000 (= NPR 10.00)"
+                keyboardType="numeric"
+                info="100 paisa = 1 NPR • Max: 100,000,000 paisa (NPR 1,000,000)"
+                required
+                error={formErrors.amount}
+              />
+
+              <InputField
+                label="Order ID"
+                value={orderId}
+                onChangeText={setOrderId}
+                placeholder="ORDER_12345"
+                info="Unique identifier for this order"
+                required
+                error={formErrors.orderId}
+              />
+
+              <InputField
+                label="Order Name"
+                value={orderName}
+                onChangeText={setOrderName}
+                placeholder="Product or service name"
+                info="Description of what the customer is purchasing"
+                required
+                error={formErrors.orderName}
+              />
+            </ConfigGroup>
+
+            {/* Customer Information */}
+            <ConfigGroup title="Customer Information (Optional)">
+              <InputField
+                label="Customer Name"
+                value={customerName}
+                onChangeText={setCustomerName}
+                placeholder="John Doe"
+              />
+
+              <InputField
+                label="Customer Email"
+                value={customerEmail}
+                onChangeText={setCustomerEmail}
+                placeholder="john@example.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                error={formErrors.customerEmail}
+              />
+
+              <InputField
+                label="Customer Phone"
+                value={customerPhone}
+                onChangeText={setCustomerPhone}
+                placeholder="9800000000"
+                keyboardType="phone-pad"
+                info="Nepal mobile number format: 9XXXXXXXX"
+                error={formErrors.customerPhone}
+              />
+            </ConfigGroup>
+
+            {/* Action Buttons */}
+            <View style={styles.actionButtons}>
+              <TouchableOpacity
+                style={[styles.button, styles.secondaryButton]}
+                onPress={resetForm}
+                disabled={isLoading}
+                accessibilityLabel="Reset form to default values"
+              >
+                <Text style={styles.secondaryButtonText}>Reset Form</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  styles.primaryButton,
+                  (isLoading || !isFormValid) && styles.buttonDisabled,
+                ]}
+                onPress={startPayment}
+                disabled={isLoading || !isFormValid}
+                accessibilityLabel={
+                  isFormValid
+                    ? "Start payment process"
+                    : "Fix form errors to enable payment"
                 }
-              }}
-              trackColor={{ false: "#767577", true: "#5C2D91" }}
-              thumbColor={isTestMode ? "#ffffff" : "#f4f3f4"}
-            />
-          </View>
+              >
+                {isLoading ? (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="small" color="#fff" />
+                    <Text style={styles.primaryButtonText}>Processing...</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.primaryButtonText}>Start Payment</Text>
+                )}
+              </TouchableOpacity>
+            </View>
 
-          <Text style={styles.environmentText}>
-            Current Environment:{" "}
-            <Text style={styles.bold}>{config.environment}</Text>
-          </Text>
+            {/* Information Box */}
+            <View style={styles.infoBox}>
+              <Text style={styles.infoTitle}>💡 How to use this demo:</Text>
+              <Text style={styles.infoText}>
+                1. Toggle Test/Production mode{"\n"}
+                2. Configure your Khalti keys in advanced settings{"\n"}
+                3. Fill in payment details{"\n"}
+                4. Tap "Start Payment" to test the integration{"\n"}
+                5. Complete payment in the Khalti interface
+              </Text>
 
-          <TouchableOpacity
-            style={styles.configButton}
-            onPress={() => setShowAdvancedConfig(!showAdvancedConfig)}
-          >
-            <Text style={styles.configButtonText}>
-              {showAdvancedConfig ? "Hide" : "Show"} Advanced Configuration
-            </Text>
-          </TouchableOpacity>
-        </ConfigGroup>
+              <Text style={styles.infoTitle}>🔒 Security Note:</Text>
+              <Text style={styles.infoText}>
+                This demo calls Khalti API directly from the app for testing
+                purposes. In production, payment initiation should be done from
+                your backend server.
+              </Text>
 
-        {/* Advanced Configuration */}
-        {showAdvancedConfig && (
-          <ConfigGroup title="Khalti Configuration">
-            <InputField
-              label="Public Key"
-              value={config.publicKey}
-              onChangeText={(text) =>
-                setConfig((prev) => ({ ...prev, publicKey: text }))
-              }
-              placeholder={
-                isTestMode ? "test_public_key_xxx" : "live_public_key_xxx"
-              }
-              secureTextEntry={false}
-            />
-
-            <InputField
-              label="Secret Key"
-              value={config.secretKey}
-              onChangeText={(text) =>
-                setConfig((prev) => ({ ...prev, secretKey: text }))
-              }
-              placeholder={
-                isTestMode ? "test_secret_key_xxx" : "live_secret_key_xxx"
-              }
-              secureTextEntry={true}
-              warning="⚠️ In production, API calls should be made from your secure backend server"
-            />
-
-            <InputField
-              label="Return URL"
-              value={config.returnUrl}
-              onChangeText={(text) =>
-                setConfig((prev) => ({ ...prev, returnUrl: text }))
-              }
-              placeholder="https://yourwebsite.com/payment/"
-            />
-
-            <InputField
-              label="Website URL"
-              value={config.websiteUrl}
-              onChangeText={(text) =>
-                setConfig((prev) => ({ ...prev, websiteUrl: text }))
-              }
-              placeholder="https://yourwebsite.com"
-            />
-          </ConfigGroup>
-        )}
-
-        {/* Payment Form */}
-        <ConfigGroup title="Payment Details">
-          <InputField
-            label="Amount (in paisa)*"
-            value={amount}
-            onChangeText={setAmount}
-            placeholder="1000 (= Rs. 10)"
-            keyboardType="numeric"
-            info="100 paisa = 1 NPR"
-          />
-
-          <InputField
-            label="Order ID*"
-            value={orderId}
-            onChangeText={setOrderId}
-            placeholder="ORDER_12345"
-          />
-
-          <InputField
-            label="Order Name*"
-            value={orderName}
-            onChangeText={setOrderName}
-            placeholder="Product or service name"
-          />
-        </ConfigGroup>
-
-        {/* Customer Information */}
-        <ConfigGroup title="Customer Information">
-          <InputField
-            label="Customer Name"
-            value={customerName}
-            onChangeText={setCustomerName}
-            placeholder="John Doe"
-          />
-
-          <InputField
-            label="Customer Email"
-            value={customerEmail}
-            onChangeText={setCustomerEmail}
-            placeholder="john@example.com"
-            keyboardType="email-address"
-          />
-
-          <InputField
-            label="Customer Phone"
-            value={customerPhone}
-            onChangeText={setCustomerPhone}
-            placeholder="98XXXXXXXX"
-            keyboardType="phone-pad"
-          />
-        </ConfigGroup>
-
-        {/* Action Buttons */}
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
-            onPress={resetForm}
-            disabled={isLoading}
-          >
-            <Text style={styles.secondaryButtonText}>Reset Form</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.button,
-              styles.primaryButton,
-              isLoading && styles.buttonDisabled,
-            ]}
-            onPress={startPayment}
-            disabled={isLoading || !config.publicKey}
-          >
-            <Text style={styles.primaryButtonText}>
-              {isLoading ? "Processing..." : "Start Payment"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Information Box */}
-        <View style={styles.infoBox}>
-          <Text style={styles.infoTitle}>💡 How to use this demo:</Text>
-          <Text style={styles.infoText}>
-            1. Toggle Test/Production mode{"\n"}
-            2. Configure your Khalti keys in advanced settings{"\n"}
-            3. Fill in payment details{"\n"}
-            4. Tap "Start Payment" to test the integration{"\n"}
-            5. Complete payment in the Khalti interface
-          </Text>
-
-          <Text style={styles.infoTitle}>🔒 Security Note:</Text>
-          <Text style={styles.infoText}>
-            This demo calls Khalti API directly from the app for testing
-            purposes. In production, payment initiation should be done from your
-            secure backend server.
-          </Text>
-        </View>
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Khalti Payment SDK v{require("../package.json").version}
-          </Text>
-          <Text style={styles.footerText}>Platform: {Platform.OS}</Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+              <Text style={styles.infoTitle}>📱 Supported Platforms:</Text>
+              <Text style={styles.infoText}>
+                • iOS 12.0 and above{"\n"}• Android API 21 and above{"\n"}• Web
+                browsers with modern JavaScript support
+              </Text>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </>
   );
 }
 
-// Helper Components
+// Enhanced helper components
 function ConfigGroup({
   title,
   children,
@@ -496,8 +733,11 @@ interface InputFieldProps {
   placeholder?: string;
   keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
   secureTextEntry?: boolean;
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
   info?: string;
   warning?: string;
+  error?: string;
+  required?: boolean;
 }
 
 function InputField({
@@ -507,134 +747,218 @@ function InputField({
   placeholder,
   keyboardType = "default",
   secureTextEntry = false,
+  autoCapitalize = "none",
   info,
   warning,
+  error,
+  required = false,
 }: InputFieldProps) {
   return (
     <View style={styles.formGroup}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.label}>
+        {label}
+        {required && <Text style={styles.requiredMark}> *</Text>}
+      </Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, error && styles.inputError]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
         keyboardType={keyboardType}
         secureTextEntry={secureTextEntry}
-        autoCapitalize="none"
+        autoCapitalize={autoCapitalize}
         autoCorrect={false}
+        accessibilityLabel={label}
       />
-      {info && <Text style={styles.infoTextSmall}>{info}</Text>}
-      {warning && <Text style={styles.warningTextSmall}>{warning}</Text>}
+      {error && <Text style={styles.errorText}>{error}</Text>}
+      {info && !error && <Text style={styles.infoTextSmall}>{info}</Text>}
+      {warning && !error && (
+        <Text style={styles.warningTextSmall}>{warning}</Text>
+      )}
     </View>
   );
 }
 
 const styles = {
+  // Layout styles
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: COLORS.BACKGROUND,
+  },
+  flex: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,
   },
+
+  // Header styles
+  headerSection: {
+    alignItems: "center" as const,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+  },
   header: {
-    fontSize: 28,
-    fontWeight: "bold" as const,
+    fontSize: 32,
+    fontWeight: "700" as const,
     textAlign: "center" as const,
-    marginTop: 20,
-    marginBottom: 5,
-    color: "#333",
+    color: "#1a1a1a",
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 18,
     textAlign: "center" as const,
-    marginBottom: 20,
-    color: "#666",
+    color: "#6c757d",
+    marginBottom: 12,
   },
+  versionBadge: {
+    backgroundColor: "#e9ecef",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  versionText: {
+    fontSize: 12,
+    color: "#6c757d",
+    fontWeight: "500" as const,
+  },
+
+  // Status styles
   statusContainer: {
-    margin: 15,
-    padding: 15,
+    margin: 16,
+    padding: 20,
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: 12,
     borderLeftWidth: 4,
     borderLeftColor: "#5C2D91",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  statusLoading: {
+    borderLeftColor: "#ffc107",
+  },
+  statusHeader: {
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
+    marginBottom: 8,
   },
   statusLabel: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "600" as const,
-    color: "#333",
-    marginBottom: 5,
+    color: "#1a1a1a",
   },
   statusText: {
     fontSize: 14,
-    color: "#666",
-    lineHeight: 20,
+    color: "#495057",
+    lineHeight: 22,
+    marginBottom: 8,
   },
+  amountPreview: {
+    fontSize: 14,
+    color: "#5C2D91",
+    fontWeight: "600" as const,
+    backgroundColor: "#f8f4ff",
+    padding: 8,
+    borderRadius: 6,
+    textAlign: "center" as const,
+  },
+
+  // Group styles
   group: {
-    margin: 15,
+    margin: 16,
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 3,
   },
   groupHeader: {
-    fontSize: 18,
-    fontWeight: "bold" as const,
-    marginBottom: 15,
-    color: "#333",
+    fontSize: 20,
+    fontWeight: "700" as const,
+    marginBottom: 20,
+    color: "#1a1a1a",
   },
+
+  // Form styles
   formGroup: {
-    marginBottom: 15,
+    marginBottom: 20,
   },
   label: {
     fontSize: 16,
     fontWeight: "600" as const,
     marginBottom: 8,
-    color: "#333",
+    color: "#1a1a1a",
+  },
+  requiredMark: {
+    color: "#dc3545",
+    fontWeight: "700" as const,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#dee2e6",
     borderRadius: 8,
-    padding: 12,
+    padding: 14,
     fontSize: 16,
     backgroundColor: "#fff",
+    color: "#1a1a1a",
   },
+  inputError: {
+    borderColor: "#dc3545",
+    backgroundColor: "#fff5f5",
+  },
+
+  // Switch styles
   switchContainer: {
     flexDirection: "row" as const,
     justifyContent: "space-between" as const,
     alignItems: "center" as const,
-    marginBottom: 15,
-    paddingVertical: 5,
+    marginBottom: 16,
+    paddingVertical: 8,
+  },
+  switchLabelContainer: {
+    flex: 1,
+    marginRight: 16,
   },
   switchLabel: {
     fontSize: 16,
-    color: "#333",
-    flex: 1,
+    fontWeight: "600" as const,
+    color: "#1a1a1a",
+    marginBottom: 4,
+  },
+  switchDescription: {
+    fontSize: 14,
+    color: "#6c757d",
+  },
+
+  // Environment styles
+  environmentDisplay: {
+    marginBottom: 16,
   },
   environmentText: {
     fontSize: 16,
-    color: "#333",
-    marginBottom: 15,
+    color: "#1a1a1a",
+    marginBottom: 8,
   },
   bold: {
-    fontWeight: "bold" as const,
+    fontWeight: "700" as const,
     color: "#5C2D91",
   },
+
+  // Button styles
   configButton: {
-    backgroundColor: "#f0f0f0",
-    padding: 12,
+    backgroundColor: "#f8f9fa",
+    padding: 14,
     borderRadius: 8,
     alignItems: "center" as const,
+    borderWidth: 1,
+    borderColor: "#dee2e6",
   },
   configButtonText: {
     color: "#5C2D91",
@@ -643,88 +967,94 @@ const styles = {
   },
   actionButtons: {
     flexDirection: "row" as const,
-    gap: 10,
-    margin: 15,
+    gap: 12,
+    margin: 16,
   },
   button: {
     flex: 1,
-    padding: 15,
+    padding: 16,
     borderRadius: 10,
     alignItems: "center" as const,
     justifyContent: "center" as const,
+    minHeight: 50,
   },
   primaryButton: {
     backgroundColor: "#5C2D91",
   },
   secondaryButton: {
     backgroundColor: "#fff",
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: "#5C2D91",
   },
   buttonDisabled: {
-    backgroundColor: "#999",
+    backgroundColor: "#adb5bd",
     opacity: 0.6,
   },
   primaryButtonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "bold" as const,
+    fontWeight: "700" as const,
   },
   secondaryButtonText: {
     color: "#5C2D91",
     fontSize: 16,
     fontWeight: "600" as const,
   },
+  loadingContainer: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+  },
+
+  // Info box styles
   infoBox: {
-    margin: 15,
-    padding: 15,
+    margin: 16,
+    padding: 20,
     backgroundColor: "#e8f4fd",
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: "#bee5eb",
   },
   infoTitle: {
     fontSize: 16,
-    fontWeight: "bold" as const,
+    fontWeight: "700" as const,
     color: "#0c5460",
     marginBottom: 8,
+    marginTop: 12,
   },
   infoText: {
     fontSize: 14,
     color: "#0c5460",
-    lineHeight: 20,
-    marginBottom: 10,
+    lineHeight: 22,
+    marginBottom: 8,
+  },
+
+  // Error and info text styles
+  errorContainer: {
+    backgroundColor: "#fff5f5",
+    padding: 12,
+    borderRadius: 6,
+    borderLeftWidth: 3,
+    borderLeftColor: "#dc3545",
+    marginTop: 8,
+  },
+  errorText: {
+    fontSize: 12,
+    color: "#dc3545",
+    marginTop: 6,
+    fontWeight: "500" as const,
   },
   infoTextSmall: {
     fontSize: 12,
-    color: "#666",
-    marginTop: 5,
+    color: "#6c757d",
+    marginTop: 6,
     fontStyle: "italic" as const,
-  },
-  warningText: {
-    fontSize: 14,
-    marginBottom: 15,
-    padding: 10,
-    backgroundColor: "#fff3cd",
-    borderRadius: 5,
-    color: "#856404",
-    borderWidth: 1,
-    borderColor: "#ffeaa7",
   },
   warningTextSmall: {
     fontSize: 12,
-    color: "#d1a000",
-    marginTop: 5,
+    color: "#e67e22",
+    marginTop: 6,
     fontStyle: "italic" as const,
-  },
-  footer: {
-    alignItems: "center" as const,
-    padding: 20,
-    marginBottom: 20,
-  },
-  footerText: {
-    fontSize: 12,
-    color: "#999",
-    textAlign: "center" as const,
+    fontWeight: "500" as const,
   },
 };

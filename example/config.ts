@@ -1,5 +1,5 @@
 // Types
-type KhaltiEnvironment = "TEST" | "PROD";
+export type KhaltiEnvironment = "TEST" | "PROD";
 
 // Configuration interface
 export interface KhaltiConfig {
@@ -13,7 +13,7 @@ export interface KhaltiConfig {
 // Default test configuration (safe to commit)
 export const DEFAULT_TEST_CONFIG: KhaltiConfig = {
   publicKey: "b9288a8a24c144e389d012ce992eea58",
-  secretKey: "8472e5a3a43541e6ba54e623d17f8c95", 
+  secretKey: "8472e5a3a43541e6ba54e623d17f8c95",
   environment: "TEST",
   returnUrl: "https://example.com/payment/",
   websiteUrl: "https://example.com",
@@ -22,7 +22,7 @@ export const DEFAULT_TEST_CONFIG: KhaltiConfig = {
 // Default production configuration template
 export const DEFAULT_PROD_CONFIG: KhaltiConfig = {
   publicKey: "", // Add your production public key
-  secretKey: "", // Add your production secret key  
+  secretKey: "", // Add your production secret key
   environment: "PROD",
   returnUrl: "https://yourwebsite.com/payment/",
   websiteUrl: "https://yourwebsite.com",
@@ -35,8 +35,8 @@ export const DEFAULT_PROD_CONFIG: KhaltiConfig = {
 export const loadConfig = (environment: KhaltiEnvironment): KhaltiConfig => {
   try {
     // Try to load from local config file
-    const config = require('./config.json');
-    
+    const config = require("./config.json");
+
     if (environment === "TEST") {
       return config.development || DEFAULT_TEST_CONFIG;
     } else {
@@ -44,7 +44,9 @@ export const loadConfig = (environment: KhaltiEnvironment): KhaltiConfig => {
     }
   } catch (error) {
     // Fallback to default configs if config.json doesn't exist
-    console.log("Using default configuration. Create config.json for custom settings.");
+    console.log(
+      "Using default configuration. Create config.json for custom settings."
+    );
     return environment === "TEST" ? DEFAULT_TEST_CONFIG : DEFAULT_PROD_CONFIG;
   }
 };
@@ -52,7 +54,9 @@ export const loadConfig = (environment: KhaltiEnvironment): KhaltiConfig => {
 /**
  * Validate configuration before use
  */
-export const validateConfig = (config: KhaltiConfig): { isValid: boolean; errors: string[] } => {
+export const validateConfig = (
+  config: KhaltiConfig
+): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
 
   if (!config.publicKey || config.publicKey.trim() === "") {
@@ -81,7 +85,7 @@ export const validateConfig = (config: KhaltiConfig): { isValid: boolean; errors
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
 
@@ -101,7 +105,7 @@ const isValidUrl = (url: string): boolean => {
  * Get environment-specific API base URL
  */
 export const getKhaltiApiUrl = (environment: KhaltiEnvironment): string => {
-  return environment === "TEST" 
+  return environment === "TEST"
     ? "https://a.khalti.com/api/v2/epayment/initiate/"
     : "https://khalti.com/api/v2/epayment/initiate/";
 };

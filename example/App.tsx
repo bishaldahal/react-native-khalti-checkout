@@ -187,7 +187,7 @@ export default function App() {
         Alert.alert(ALERTS.PAYMENT_SUCCESS, message, [
           {
             text: "OK",
-            onPress: () => setPaymentStatus("Ready for next payment"),
+            onPress: () => setPaymentStatus(STATUS_MESSAGES.READY_FOR_NEXT),
           },
         ]);
       } catch (error) {
@@ -204,7 +204,7 @@ export default function App() {
         Alert.alert(ALERTS.PAYMENT_ERROR, message, [
           {
             text: "OK",
-            onPress: () => setPaymentStatus("Ready to retry payment"),
+            onPress: () => setPaymentStatus(STATUS_MESSAGES.READY_TO_RETRY),
           },
         ]);
       } catch (error) {
@@ -221,7 +221,7 @@ export default function App() {
         Alert.alert(ALERTS.PAYMENT_CANCELLED, message, [
           {
             text: "OK",
-            onPress: () => setPaymentStatus("Ready for new payment"),
+            onPress: () => setPaymentStatus(STATUS_MESSAGES.READY_FOR_NEW),
           },
         ]);
       } catch (error) {
@@ -320,7 +320,7 @@ export default function App() {
   const startPayment = useCallback(async () => {
     try {
       setIsLoading(true);
-      setPaymentStatus("🔄 Validating payment details...");
+      setPaymentStatus(STATUS_MESSAGES.VALIDATING);
 
       // Validate form before proceeding
       const errors = validateForm();
@@ -349,10 +349,10 @@ export default function App() {
       console.log("💳 Starting payment process with data:", paymentData);
 
       // Get pidx from Khalti API
-      setPaymentStatus("🌐 Calling Khalti API to initiate payment...");
+      setPaymentStatus(STATUS_MESSAGES.CALLING_API);
       const pidx = await initiatePaymentWithKhalti(paymentData);
 
-      setPaymentStatus("📱 Opening Khalti payment interface...");
+      setPaymentStatus(STATUS_MESSAGES.OPENING_SDK);
 
       // Create payment arguments for SDK
       const paymentArgs: PaymentArgs = {
@@ -400,13 +400,13 @@ export default function App() {
    * Reset form to initial state
    */
   const resetForm = useCallback(() => {
-    setAmount("1000");
+    setAmount(DEFAULT_FORM_VALUES.AMOUNT);
     setOrderId(generateOrderId());
-    setOrderName("Test Product");
-    setCustomerName("John Doe");
-    setCustomerEmail("john@example.com");
-    setCustomerPhone("9800000000");
-    setPaymentStatus("Ready to test payments");
+    setOrderName(DEFAULT_FORM_VALUES.ORDER_NAME);
+    setCustomerName(DEFAULT_FORM_VALUES.CUSTOMER_NAME);
+    setCustomerEmail(DEFAULT_FORM_VALUES.CUSTOMER_EMAIL);
+    setCustomerPhone(DEFAULT_FORM_VALUES.CUSTOMER_PHONE);
+    setPaymentStatus(STATUS_MESSAGES.READY);
     setIsLoading(false);
     setFormErrors({});
     scrollViewRef.current?.scrollTo({ y: 0, animated: true });
@@ -421,7 +421,7 @@ export default function App() {
       if (!value && (!config.publicKey || !config.secretKey)) {
         Alert.alert(
           ALERTS.PRODUCTION_MODE,
-          "Please configure your production keys before switching to production mode.",
+          ALERTS.PRODUCTION_MODE_MESSAGE,
           [{ text: "OK" }]
         );
       }
@@ -587,7 +587,7 @@ export default function App() {
                 onChangeText={setAmount}
                 placeholder="1000 (= NPR 10.00)"
                 keyboardType="numeric"
-                info="100 paisa = 1 NPR • Max: 100,000,000 paisa (NPR 1,000,000)"
+                info={`100 paisa = 1 NPR • Max: ${(PAYMENT_LIMITS.MAX_AMOUNT / 100).toLocaleString()} NPR`}
                 required
                 error={formErrors.amount}
               />

@@ -12,8 +12,8 @@
     "build:android": "expo build:android",
     "build:ios": "expo build:ios",
     "eject": "expo eject",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\""
   },
   "dependencies": {
     "expo": "~53.0.16",

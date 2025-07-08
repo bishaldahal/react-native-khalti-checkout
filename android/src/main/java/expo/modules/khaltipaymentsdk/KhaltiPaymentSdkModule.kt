@@ -151,15 +151,15 @@ class KhaltiPaymentSdkModule : Module() {
       val config = createPaymentConfig(args, environment)
 
       khalti = Khalti.init(
-        activity = currentActivity,
+        context = currentActivity,
         config = config,
-        onPaymentResult = { paymentResult, khalti ->
+        onPaymentResult = { paymentResult: PaymentResult, khalti: Khalti ->
           handlePaymentResult(paymentResult, khalti, args, promise)
         },
         onMessage = { payload, khalti ->
           handlePaymentMessage(payload, khalti, args, promise)
         },
-        onReturn = { khalti ->
+        onReturn = { khalti: Khalti ->
           handlePaymentReturn(khalti)
         }
       )
@@ -300,7 +300,7 @@ class KhaltiPaymentSdkModule : Module() {
   /**
    * Handles return URL callback from Khalti.
    */
-  private fun handlePaymentReturn(khalti: Khalti) {
+  private fun handlePaymentReturn(@Suppress("UNUSED_PARAMETER") khalti: Khalti) {
     Log.d(TAG, "Payment return URL loaded")
 
     // Optional: Send event to React Native if needed

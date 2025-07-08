@@ -4,24 +4,27 @@ import android.util.Log
 import com.khalti.checkout.Khalti
 import com.khalti.checkout.data.Environment
 import com.khalti.checkout.data.KhaltiPayConfig
+import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.Promise
-import expo.modules.kotlin.exception.Exceptions
+import expo.modules.kotlin.exception.CodedException
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.records.Field
 import expo.modules.kotlin.records.Record
 
 /**
- * Expo module for Khalti Payment Gateway integration
- * 
- * This module provides React Native interface for Khalti's checkout-android SDK,
- * enabling seamless payment processing for Nepalese merchants.
- * 
+ * Expo module for integrating Khalti Payment Gateway in React Native/Expo applications.
+ *
+ * This module provides a native Android interface for Khalti's checkout-android SDK, enabling
+ * seamless payment processing for Nepalese merchants. It supports payments via Khalti wallet,
+ * eBanking, mobile banking, and cards.
+ *
  * @author Bishal Dahal
  * @version 0.1.0
+ * @since 0.1.0
  */
 class KhaltiPaymentSdkModule : Module() {
-  
+
   companion object {
     private const val TAG = "KhaltiPaymentSDK"
     private const val ERROR_NO_ACTIVITY = "ERR_NO_ACTIVITY"
@@ -29,6 +32,18 @@ class KhaltiPaymentSdkModule : Module() {
     private const val ERROR_PAYMENT_FAILED = "ERR_PAYMENT_FAILED"
     private const val ERROR_PAYMENT_CANCELED = "ERR_PAYMENT_CANCELED"
     private const val ERROR_INVALID_CONFIG = "ERR_INVALID_CONFIG"
+    private const val ERROR_CLOSE_FAILED = "ERR_CLOSE_PAYMENT"
+    private const val ERROR_GET_CONFIG = "ERR_GET_CONFIG"
+
+    private const val ENV_PROD = "PROD"
+    private const val ENV_TEST = "TEST"
+
+    // Khalti OnMessageEvent constants
+    private const val EVENT_KPG_DISPOSED = "KPGDisposed"
+    private const val EVENT_RETURN_URL_FAILURE = "ReturnUrlLoadFailure"
+    private const val EVENT_NETWORK_FAILURE = "NetworkFailure"
+    private const val EVENT_PAYMENT_LOOKUP_FAILURE = "PaymentLookUpFailure"
+    private const val EVENT_UNKNOWN = "Unknown"
   }
 
   private var khalti: Khalti? = null
@@ -49,28 +64,36 @@ class KhaltiPaymentSdkModule : Module() {
       try {
         validatePaymentArgs(args)
         initializePayment(args, promise)
-      } catch (e: Exception) {
+      } catch (e: CodedException) {
         Log.e(TAG, "Failed to start payment: ${e.message}", e)
+        promise.reject(e)
+      } catch (e: Exception) {
+        Log.e(TAG, "Unexpected error starting payment: ${e.message}", e)
         promise.reject(ERROR_PAYMENT_INIT, "Failed to initialize payment: ${e.message}", e)
       }
     }
 
     /**
-     * Close the current payment session
+     * Closes the current Khalti payment session.
+     *
+     * @param promise Resolves with a confirmation or rejects if closing fails.
      */
     AsyncFunction("closePayment") { promise: Promise ->
       try {
         khalti?.close()
         khalti = null
         promise.resolve(mapOf("status" to "closed"))
+        Log.d(TAG, "Payment session closed successfully")
       } catch (e: Exception) {
         Log.e(TAG, "Failed to close payment: ${e.message}", e)
-        promise.reject("ERR_CLOSE_PAYMENT", "Failed to close payment: ${e.message}", e)
+        promise.reject(ERROR_CLOSE_FAILED, "Failed to close payment: ${e.message}", e)
       }
     }
 
     /**
-     * Get the current payment configuration
+     * Retrieves the current Khalti payment configuration.
+     *
+     * @param promise Resolves with the configuration or null if none exists.
      */
     AsyncFunction("getPaymentConfig") { promise: Promise ->
       try {
@@ -87,40 +110,49 @@ class KhaltiPaymentSdkModule : Module() {
         }
       } catch (e: Exception) {
         Log.e(TAG, "Failed to get config: ${e.message}", e)
-        promise.reject("ERR_GET_CONFIG", "Failed to get payment configuration: ${e.message}", e)
+        promise.reject(ERROR_GET_CONFIG, "Failed to get payment configuration: ${e.message}", e)
       }
+    }
+
+    // Clean up on module destruction
+    OnDestroy {
+      khalti?.close()
+      khalti = null
+      Log.d(TAG, "KhaltiPaymentSdkModule destroyed")
     }
   }
 
   /**
-   * Validate payment arguments before processing
+   * Validates payment arguments.
+   *
+   * @throws InvalidConfigException if arguments are invalid.
    */
   private fun validatePaymentArgs(args: PaymentArgs) {
     if (args.publicKey.isBlank()) {
-      throw IllegalArgumentException("Public key is required")
+      throw InvalidConfigException("Public key is required")
     }
     if (args.pidx.isBlank()) {
-      throw IllegalArgumentException("PIDX is required")
+      throw InvalidConfigException("PIDX is required")
     }
     if (args.publicKey.length < 10) {
-      throw IllegalArgumentException("Invalid public key format")
+      throw InvalidConfigException("Invalid public key format")
     }
   }
 
   /**
-   * Initialize payment with validated arguments
+   * Initializes a Khalti payment session.
    */
   private fun initializePayment(args: PaymentArgs, promise: Promise) {
     val currentActivity = appContext.currentActivity
-      ?: throw IllegalStateException("No current activity available")
+      ?: throw NoActivityException()
 
     try {
       val environment = parseEnvironment(args.environment)
       val config = createPaymentConfig(args, environment)
-      
+
       khalti = Khalti.init(
-        currentActivity,
-        config,
+        activity = currentActivity,
+        config = config,
         onPaymentResult = { paymentResult, khalti ->
           handlePaymentResult(paymentResult, khalti, args, promise)
         },
@@ -131,25 +163,24 @@ class KhaltiPaymentSdkModule : Module() {
           handlePaymentReturn(khalti)
         }
       )
-      
+
       khalti?.open()
-      Log.d(TAG, "Payment initialization successful for PIDX: ${args.pidx}")
-      
+      Log.d(TAG, "Payment initialized for PIDX: ${args.pidx}, Environment: ${args.environment}")
     } catch (e: Exception) {
       Log.e(TAG, "Payment initialization failed: ${e.message}", e)
-      throw e
+      throw PaymentInitException(e.message ?: "Unknown initialization error")
     }
   }
 
   /**
-   * Parse environment string to Environment enum
+   * Parses environment string to Khalti Environment enum.
    */
-  private fun parseEnvironment(environmentString: String): Environment {
-    return when (environmentString.uppercase()) {
-      "PROD", "PRODUCTION" -> Environment.PROD
-      "TEST", "TESTING", "" -> Environment.TEST
+  private fun parseEnvironment(environment: String): Environment {
+    return when (environment.uppercase()) {
+      ENV_PROD -> Environment.PROD
+      ENV_TEST, "" -> Environment.TEST
       else -> {
-        Log.w(TAG, "Unknown environment '$environmentString', defaulting to TEST")
+        Log.w(TAG, "Unknown environment '$environment', defaulting to TEST")
         Environment.TEST
       }
     }
@@ -167,72 +198,99 @@ class KhaltiPaymentSdkModule : Module() {
   }
 
   /**
-   * Handle successful payment result
+   * Handles payment result from Khalti SDK.
    */
-  private fun handlePaymentResult(paymentResult: Any, khalti: Khalti, args: PaymentArgs, promise: Promise) {
-    Log.d(TAG, "Payment result received: $paymentResult")
-    
+  private fun handlePaymentResult(paymentResult: PaymentResult, khalti: Khalti, args: PaymentArgs, promise: Promise) {
+    Log.d(TAG, "Payment result: ${paymentResult.status}, Transaction ID: ${paymentResult.payload.transactionId}")
+
     try {
       khalti.close()
-      
+      val payload = paymentResult.payload
       val successData = mapOf(
-        "pidx" to args.pidx,
-        "status" to "completed",
-        "paymentResult" to paymentResult.toString(),
+        "pidx" to payload.pidx,
+        "status" to paymentResult.status,
+        "transactionId" to payload.transactionId,
+        "totalAmount" to payload.totalAmount,
+        "fee" to payload.fee,
+        "refunded" to payload.refunded,
+        "purchaseOrderId" to payload.purchaseOrderId,
+        "purchaseOrderName" to payload.purchaseOrderName,
+        "extraMerchantParams" to payload.extraMerchantParams,
         "timestamp" to System.currentTimeMillis()
       )
-      
       sendEvent("onPaymentSuccess", successData)
       promise.resolve(successData)
-      
     } catch (e: Exception) {
-      Log.e(TAG, "Error handling payment result: ${e.message}", e)
       handlePaymentError("Failed to process payment result", e, promise)
     }
   }
 
   /**
-   * Handle payment messages and errors
+   * Handles payment messages (e.g., errors, cancellations) from Khalti SDK.
    */
-  private fun handlePaymentMessage(payload: Any, khalti: Khalti, args: PaymentArgs, promise: Promise) {
-    Log.w(TAG, "Payment message received: $payload")
-    
+  private fun handlePaymentMessage(payload: OnMessagePayload, khalti: Khalti, args: PaymentArgs, promise: Promise) {
+    Log.w(TAG, "Payment message: ${payload.event}, Code: ${payload.code}, Message: ${payload.message}")
     try {
-      // Extract message details using reflection or toString parsing
-      val messageStr = payload.toString()
-      
       khalti.close()
-      
-      when {
-        messageStr.contains("needsPaymentConfirmation", ignoreCase = true) -> {
-          val successData = mapOf(
+      when (payload.event) {
+        EVENT_KPG_DISPOSED -> {
+          val cancelData = mapOf(
             "pidx" to args.pidx,
-            "status" to "needs_verification",
-            "message" to messageStr,
+            "reason" to "user_cancelled",
             "timestamp" to System.currentTimeMillis()
           )
-          sendEvent("onPaymentSuccess", successData)
-          promise.resolve(successData)
+          sendEvent("onPaymentCancel", cancelData)
+          promise.reject(PaymentCanceledException())
         }
-        
-        messageStr.contains("Disposed", ignoreCase = true) || 
-        messageStr.contains("Cancel", ignoreCase = true) -> {
-          Log.d(TAG, "Payment cancelled by user")
-          sendEvent("onPaymentCancel", mapOf("reason" to "user_cancelled"))
-          promise.reject(ERROR_PAYMENT_CANCELED, "Payment was cancelled by the user", null)
-        }
-        
-        else -> {
+        EVENT_RETURN_URL_FAILURE, EVENT_NETWORK_FAILURE, EVENT_PAYMENT_LOOKUP_FAILURE -> {
           val errorData = mapOf(
-            "error" to messageStr,
+            "pidx" to args.pidx,
+            "error" to payload.message,
             "status" to "failed",
+            "code" to payload.code,
+            "event" to payload.event,
             "timestamp" to System.currentTimeMillis()
           )
           sendEvent("onPaymentError", errorData)
-          promise.reject(ERROR_PAYMENT_FAILED, messageStr, null)
+          promise.reject(PaymentFailedException(payload.message, payload.throwable))
+        }
+        EVENT_UNKNOWN -> {
+          val errorData = mapOf(
+            "pidx" to args.pidx,
+            "error" to payload.message,
+            "status" to "failed",
+            "code" to payload.code,
+            "event" to payload.event,
+            "timestamp" to System.currentTimeMillis()
+          )
+          sendEvent("onPaymentError", errorData)
+          promise.reject(PaymentFailedException(payload.message, payload.throwable))
+        }
+        else -> {
+          if (payload.needsPaymentConfirmation) {
+            val successData = mapOf(
+              "pidx" to args.pidx,
+              "status" to "needs_verification",
+              "message" to payload.message,
+              "code" to payload.code,
+              "timestamp" to System.currentTimeMillis()
+            )
+            sendEvent("onPaymentSuccess", successData)
+            promise.resolve(successData)
+          } else {
+            val errorData = mapOf(
+              "pidx" to args.pidx,
+              "error" to payload.message,
+              "status" to "failed",
+              "code" to payload.code,
+              "event" to payload.event,
+              "timestamp" to System.currentTimeMillis()
+            )
+            sendEvent("onPaymentError", errorData)
+            promise.reject(PaymentFailedException(payload.message, payload.throwable))
+          }
         }
       }
-      
     } catch (e: Exception) {
       Log.e(TAG, "Error handling payment message: ${e.message}", e)
       handlePaymentError("Failed to process payment message", e, promise)
@@ -240,15 +298,17 @@ class KhaltiPaymentSdkModule : Module() {
   }
 
   /**
-   * Handle return URL callback
+   * Handles return URL callback from Khalti.
    */
   private fun handlePaymentReturn(khalti: Khalti) {
-    Log.d(TAG, "Payment return URL loaded successfully")
+    Log.d(TAG, "Payment return URL loaded")
+
     // Optional: Send event to React Native if needed
+    // sendEvent("onPaymentReturn", mapOf("status" to "return_url_loaded"))
   }
 
   /**
-   * Handle payment errors consistently
+   * Handles payment errors consistently.
    */
   private fun handlePaymentError(message: String, error: Throwable?, promise: Promise) {
     val errorData = mapOf(
@@ -257,26 +317,62 @@ class KhaltiPaymentSdkModule : Module() {
       "timestamp" to System.currentTimeMillis(),
       "details" to (error?.message ?: "Unknown error")
     )
-    
     sendEvent("onPaymentError", errorData)
-    promise.reject(ERROR_PAYMENT_FAILED, message, error)
+    promise.reject(PaymentFailedException(message, error))
   }
 
   /**
-   * Payment arguments data class
-   * 
-   * @property publicKey Khalti merchant public key
-   * @property pidx Payment identifier from payment initiation
-   * @property environment Payment environment (TEST or PROD)
+   * Custom exceptions for better error handling.
+   */
+  class InvalidConfigException(message: String) : CodedException(ERROR_INVALID_CONFIG, message, null)
+  class NoActivityException : CodedException(ERROR_NO_ACTIVITY, "No current activity available", null)
+  class PaymentInitException(message: String) : CodedException(ERROR_PAYMENT_INIT, message, null)
+  class PaymentFailedException(message: String, cause: Throwable? = null) : CodedException(ERROR_PAYMENT_FAILED, message, cause)
+  class PaymentCanceledException : CodedException(ERROR_PAYMENT_CANCELED, "Payment was cancelled by the user", null)
+
+  /**
+   * Payment arguments for configuring Khalti payment.
+   *
+   * @property publicKey Khalti merchant public key.
+   * @property pidx Unique payment identifier from Khalti initiation.
+   * @property environment Payment environment ("TEST" or "PROD").
    */
   class PaymentArgs : Record {
     @Field
     val publicKey: String = ""
-    
+
     @Field
     val pidx: String = ""
-    
+
     @Field
-    val environment: String = "TEST"
+    val environment: String = ENV_TEST
   }
+
+  /**
+   * Khalti SDK type definitions.
+   */
+  data class PaymentResult(
+    val status: String,
+    val payload: PaymentPayload
+  )
+
+  data class PaymentPayload(
+    val pidx: String,
+    val totalAmount: Long,
+    val status: String,
+    val transactionId: String,
+    val fee: Long,
+    val refunded: Boolean,
+    val purchaseOrderId: String,
+    val purchaseOrderName: String,
+    val extraMerchantParams: Map<String, Any>
+  )
+
+  data class OnMessagePayload(
+    val event: String,
+    val message: String,
+    val throwable: Throwable?,
+    val code: Number,
+    val needsPaymentConfirmation: Boolean
+  )
 }

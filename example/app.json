@@ -23,9 +23,6 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "expo.modules.khaltipaymentsdk.example"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     }
   }
 }

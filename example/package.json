@@ -8,7 +8,6 @@
     "start:clear": "expo start --clear",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web",
     "build:android": "expo build:android",
     "build:ios": "expo build:ios",
     "eject": "expo eject",

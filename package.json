@@ -1,7 +1,7 @@
 {
-  "name": "khalti-payment-sdk",
-  "version": "1.0.0",
-  "description": "A comprehensive React Native/Expo SDK for integrating Khalti Payment Gateway into your mobile applications. Accept payments from Khalti users, eBanking users, mobile banking users, and card holders in Nepal.",
+  "name": "@bishaldahal/react-native-khalti-checkout",
+  "version": "0.1.0",
+  "description": "React Native/Expo SDK for Khalti Payment Gateway. Accept payments from Khalti, eBanking, mobile banking, and cards in Nepal.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
@@ -25,17 +25,16 @@
     "mobile-payment",
     "ebanking",
     "khalti-payment",
-    "khalti-sdk",
+    "khalti-checkout",
     "android",
-    "typescript",
-    "expo-module"
+    "typescript"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/bishaldahal/khalti-payment-sdk.git"
+    "url": "https://github.com/bishaldahal/react-native-khalti-checkout.git"
   },
   "bugs": {
-    "url": "https://github.com/bishaldahal/khalti-payment-sdk/issues"
+    "url": "https://github.com/bishaldahal/react-native-khalti-checkout/issues"
   },
   "author": {
     "name": "Bishal Dahal",
@@ -43,7 +42,7 @@
     "url": "https://github.com/bishaldahal"
   },
   "license": "MIT",
-  "homepage": "https://github.com/bishaldahal/khalti-payment-sdk#readme",
+  "homepage": "https://github.com/bishaldahal/react-native-khalti-checkout#readme",
   "files": [
     "build",
     "android",
@@ -72,5 +71,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "nativeDependencies": {
+    "khalti-android-sdk": "com.khalti:checkout-sdk-android:<latest-version>"
   }
 }

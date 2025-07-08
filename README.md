@@ -360,7 +360,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Changelog
 
-### v1.0.0
+### v0.1.0
 - Initial release
 - Android support
 - Basic payment functionality

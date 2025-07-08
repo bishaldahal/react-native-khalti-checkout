@@ -18,7 +18,7 @@ import expo.modules.kotlin.records.Record
  * enabling seamless payment processing for Nepalese merchants.
  * 
  * @author Bishal Dahal
- * @version 1.0.0
+ * @version 0.1.0
  */
 class KhaltiPaymentSdkModule : Module() {
   

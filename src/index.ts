@@ -6,7 +6,7 @@ import {
   PaymentCancelPayload,
   PaymentConfigResponse,
   PaymentCloseResponse,
-//   KhaltiErrorCode,
+  //   KhaltiErrorCode,
 } from "./KhaltiPaymentSdk.types";
 import {
   validatePaymentArgs,
@@ -191,13 +191,6 @@ class KhaltiPaymentSDK {
   removeAllListeners(): void {
     this.subscriptions.forEach((subscription) => subscription.remove());
     this.subscriptions = [];
-  }
-
-  /**
-   * Get SDK version information
-   */
-  getVersion(): string {
-    return "1.0.0"; // Update this based on your package.json
   }
 
   /**

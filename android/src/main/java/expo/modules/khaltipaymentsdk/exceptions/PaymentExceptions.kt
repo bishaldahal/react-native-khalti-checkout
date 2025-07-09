@@ -1,4 +1,4 @@
-package expo.modules.khaltipaymentsdk.exceptions
+package expo.modules.khalticheckout.exceptions
 
 import expo.modules.kotlin.exception.CodedException
 

@@ -1,4 +1,4 @@
-package expo.modules.khaltipaymentsdk.handlers
+package expo.modules.khalticheckout.handlers
 
 import com.khalti.checkout.Khalti
 import com.khalti.checkout.data.PaymentResult
@@ -6,11 +6,11 @@ import com.khalti.checkout.resource.OnMessageEvent
 import com.khalti.checkout.resource.OnMessagePayload
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.modules.Module
-import expo.modules.khaltipaymentsdk.AppLogger
-import expo.modules.khaltipaymentsdk.constants.KhaltiConstants
-import expo.modules.khaltipaymentsdk.exceptions.PaymentCanceledException
-import expo.modules.khaltipaymentsdk.exceptions.PaymentFailedException
-import expo.modules.khaltipaymentsdk.models.PaymentArgs
+import expo.modules.khalticheckout.AppLogger
+import expo.modules.khalticheckout.constants.KhaltiConstants
+import expo.modules.khalticheckout.exceptions.PaymentCanceledException
+import expo.modules.khalticheckout.exceptions.PaymentFailedException
+import expo.modules.khalticheckout.models.PaymentArgs
 
 /**
  * Handles payment callbacks and events from Khalti SDK.

@@ -4,6 +4,6 @@
     "modules": ["KhaltiPaymentSdkModule"]
   },
   "android": {
-    "modules": ["expo.modules.khaltipaymentsdk.KhaltiPaymentSdkModule"]
+    "modules": ["expo.modules.khalticheckout.KhaltiPaymentSdkModule"]
   }
 }

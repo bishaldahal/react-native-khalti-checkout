@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "expo.modules.khaltipaymentsdk.example"
+      "bundleIdentifier": "expo.modules.khalticheckout.example"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +22,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "expo.modules.khaltipaymentsdk.example"
+      "package": "expo.modules.khalticheckout.example"
     }
   }
 }

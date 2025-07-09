@@ -1,11 +1,11 @@
-package expo.modules.khaltipaymentsdk.utils
+package expo.modules.khalticheckout.utils
 
 import com.khalti.checkout.data.Environment
 import com.khalti.checkout.data.KhaltiPayConfig
-import expo.modules.khaltipaymentsdk.AppLogger
-import expo.modules.khaltipaymentsdk.constants.KhaltiConstants
-import expo.modules.khaltipaymentsdk.exceptions.InvalidConfigException
-import expo.modules.khaltipaymentsdk.models.PaymentArgs
+import expo.modules.khalticheckout.AppLogger
+import expo.modules.khalticheckout.constants.KhaltiConstants
+import expo.modules.khalticheckout.exceptions.InvalidConfigException
+import expo.modules.khalticheckout.models.PaymentArgs
 
 /**
  * Utility functions for payment configuration and validation.

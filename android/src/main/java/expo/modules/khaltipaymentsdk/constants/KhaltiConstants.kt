@@ -1,4 +1,4 @@
-package expo.modules.khaltipaymentsdk.constants
+package expo.modules.khalticheckout.constants
 
 /**
  * Constants used throughout the Khalti Payment SDK module.

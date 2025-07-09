@@ -1,4 +1,4 @@
-package expo.modules.khaltipaymentsdk.models
+package expo.modules.khalticheckout.models
 
 import expo.modules.kotlin.records.Field
 import expo.modules.kotlin.records.Record

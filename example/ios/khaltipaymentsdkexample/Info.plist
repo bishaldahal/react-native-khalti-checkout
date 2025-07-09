@@ -27,7 +27,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>expo.modules.khaltipaymentsdk.example</string>
+          <string>expo.modules.khalticheckout.example</string>
         </array>
       </dict>
     </array>

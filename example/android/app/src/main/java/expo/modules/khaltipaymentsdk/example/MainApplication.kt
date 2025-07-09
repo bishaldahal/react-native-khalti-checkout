@@ -1,4 +1,4 @@
-package expo.modules.khaltipaymentsdk.example
+package expo.modules.khalticheckout.example
 
 import android.app.Application
 import android.content.res.Configuration

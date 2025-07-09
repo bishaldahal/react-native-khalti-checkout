@@ -1,4 +1,4 @@
-package expo.modules.khaltipaymentsdk
+package expo.modules.khalticheckout
 
 import com.khalti.checkout.Khalti
 import com.khalti.checkout.data.PaymentResult
@@ -7,11 +7,11 @@ import expo.modules.kotlin.Promise
 import expo.modules.kotlin.exception.CodedException
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import expo.modules.khaltipaymentsdk.constants.KhaltiConstants
-import expo.modules.khaltipaymentsdk.exceptions.*
-import expo.modules.khaltipaymentsdk.handlers.PaymentResultHandler
-import expo.modules.khaltipaymentsdk.models.PaymentArgs
-import expo.modules.khaltipaymentsdk.utils.PaymentUtils
+import expo.modules.khalticheckout.constants.KhaltiConstants
+import expo.modules.khalticheckout.exceptions.*
+import expo.modules.khalticheckout.handlers.PaymentResultHandler
+import expo.modules.khalticheckout.models.PaymentArgs
+import expo.modules.khalticheckout.utils.PaymentUtils
 
 /**
  * Expo module for integrating Khalti Payment Gateway in React Native/Expo applications.

@@ -1,4 +1,4 @@
-package expo.modules.khaltipaymentsdk
+package expo.modules.khalticheckout
 
 import android.util.Log
 

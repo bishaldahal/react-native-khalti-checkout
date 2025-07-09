@@ -364,8 +364,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Changelog
 
-### v0.1.0
-
 - Initial release
 - Android support with Khalti's native Android SDK
 - Basic payment functionality

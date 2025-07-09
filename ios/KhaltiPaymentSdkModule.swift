@@ -14,6 +14,16 @@ public class KhaltiPaymentSdkModule: Module {
       promise.reject("NOT_IMPLEMENTED", "iOS implementation not yet available", nil)
     }
 
+    // Define the closePayment async function  
+    AsyncFunction("closePayment") { (promise: Promise) in
+      promise.reject("NOT_IMPLEMENTED", "iOS implementation not yet available", nil)
+    }
+
+    // Define the getPaymentConfig async function
+    AsyncFunction("getPaymentConfig") { (promise: Promise) in
+      promise.reject("NOT_IMPLEMENTED", "iOS implementation not yet available", nil)
+    }
+
     // Enable view component
     View(KhaltiPaymentSdkView.self) {
       Prop("url") { (view: KhaltiPaymentSdkView, url: URL) in
@@ -30,9 +40,6 @@ public class KhaltiPaymentSdkModule: Module {
 // Define the PaymentArgs record for iOS
 struct PaymentArgs: Record {
   @Field var publicKey: String = ""
-  @Field var productId: String = ""
-  @Field var productName: String = ""
-  @Field var amount: Double = 0.0
-  @Field var productUrl: String?
-  @Field var additionalData: [String: Any]?
+  @Field var pidx: String = ""
+  @Field var environment: String = "TEST"
 }

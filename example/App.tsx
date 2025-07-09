@@ -214,6 +214,7 @@ export default function App() {
           payload?.reason || "User cancelled the payment"
         }\nTimestamp: ${new Date(payload?.timestamp || Date.now()).toLocaleString()}`;
         setPaymentStatus(message);
+        console.warn(ALERTS.PAYMENT_CANCELLED, message);
         Alert.alert(ALERTS.PAYMENT_CANCELLED, message, [
           {
             text: "OK",
@@ -230,9 +231,9 @@ export default function App() {
     // Cleanup subscriptions on unmount
     return () => {
       try {
-        successSubscription.remove();
-        errorSubscription.remove();
-        cancelSubscription.remove();
+        successSubscription?.remove();
+        errorSubscription?.remove();
+        cancelSubscription?.remove();
       } catch (error) {
         console.error("Error cleaning up subscriptions:", error);
       }
@@ -364,13 +365,6 @@ export default function App() {
 
       setPaymentStatus(`❌ Error: ${errorMessage}`);
       setIsLoading(false);
-
-      Alert.alert(ALERTS.PAYMENT_ERROR, errorMessage, [
-        {
-          text: "OK",
-          onPress: () => setPaymentStatus("Ready to retry payment"),
-        },
-      ]);
     }
   }, [
     amount,

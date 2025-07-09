@@ -210,7 +210,7 @@ export default function App() {
 
     const cancelSubscription = KhaltiPaymentSdk.onPaymentCancel(payload => {
       try {
-        const message = `⚠️ Payment Cancelled\n\nReason: ${
+        const message = `⚠️ Reason: ${
           payload?.reason || "User cancelled the payment"
         }\nTimestamp: ${new Date(payload?.timestamp || Date.now()).toLocaleString()}`;
         setPaymentStatus(message);

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0-beta.0](https://github.com/bishaldahal/react-native-khalti-checkout/compare/v0.1.0...v0.2.0-beta.0) (2025-07-09)
+
+### Features
+
+- implement async functions for closePayment and getPaymentConfig in KhaltiPaymentSdkModule ([2469577](https://github.com/bishaldahal/react-native-khalti-checkout/commit/246957762f04109ac4d476936b41b8a962f1f192))
+
+### Bug Fixes
+
+- standardize quotation marks in code examples and improve README clarity ([b8385db](https://github.com/bishaldahal/react-native-khalti-checkout/commit/b8385db00b1e6226e399f7800a2dd9793cf81793))
+
 ## 0.1.0 (2025-07-09)
 
 ### Features

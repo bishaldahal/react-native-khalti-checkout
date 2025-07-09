@@ -50,21 +50,5 @@ repositories {
 
 dependencies {
   // Khalti Android SDK - Using known working version with support library exclusions
-  implementation("com.khalti:checkout-android:0.07.00") {
-    exclude group: 'com.android.support'
-    exclude module: 'support-compat'
-    exclude module: 'support-media-compat'
-    exclude module: 'support-v4'
-    exclude module: 'appcompat-v7'
-    exclude module: 'recyclerview-v7'
-    exclude module: 'cardview-v7'
-    exclude module: 'design'
-  }
-  
-  // Add AndroidX equivalents for the excluded support libraries
-  implementation 'androidx.appcompat:appcompat:1.6.1'
-  implementation 'androidx.recyclerview:recyclerview:1.3.2'
-  implementation 'androidx.cardview:cardview:1.0.0'
-  implementation 'com.google.android.material:material:1.11.0'
-  implementation 'androidx.core:core-ktx:1.12.0'
+  implementation("com.khalti:checkout-android:0.07.00")
 }

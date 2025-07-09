@@ -2,6 +2,7 @@ package expo.modules.khaltipaymentsdk.utils
 
 import com.khalti.checkout.data.Environment
 import com.khalti.checkout.data.KhaltiPayConfig
+import expo.modules.khaltipaymentsdk.AppLogger
 import expo.modules.khaltipaymentsdk.constants.KhaltiConstants
 import expo.modules.khaltipaymentsdk.exceptions.InvalidConfigException
 import expo.modules.khaltipaymentsdk.models.PaymentArgs
@@ -36,7 +37,7 @@ object PaymentUtils {
       KhaltiConstants.ENV_PROD -> Environment.PROD
       KhaltiConstants.ENV_TEST, "" -> Environment.TEST
       else -> {
-        android.util.Log.w(KhaltiConstants.TAG, "Unknown environment '$environment', defaulting to TEST")
+        AppLogger.w("PaymentUtils", "Unknown environment '$environment', defaulting to TEST")
         Environment.TEST
       }
     }

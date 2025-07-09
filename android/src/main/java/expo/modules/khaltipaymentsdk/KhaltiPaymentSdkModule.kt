@@ -1,6 +1,5 @@
 package expo.modules.khaltipaymentsdk
 
-import android.util.Log
 import com.khalti.checkout.Khalti
 import com.khalti.checkout.data.PaymentResult
 import com.khalti.checkout.resource.OnMessagePayload
@@ -51,10 +50,10 @@ class KhaltiPaymentSdkModule : Module() {
         PaymentUtils.validatePaymentArgs(args)
         initializePayment(args, promise)
       } catch (e: CodedException) {
-        Log.e(KhaltiConstants.TAG, "Failed to start payment: ${e.message}", e)
+        AppLogger.e("PaymentInit", "Failed to start payment: ${e.message}", e)
         promise.reject(e)
       } catch (e: Exception) {
-        Log.e(KhaltiConstants.TAG, "Unexpected error starting payment: ${e.message}", e)
+        AppLogger.e("PaymentInit", "Unexpected error starting payment: ${e.message}", e)
         promise.reject(KhaltiConstants.ERROR_PAYMENT_INIT, "Failed to initialize payment: ${e.message}", e)
       }
     }
@@ -69,9 +68,9 @@ class KhaltiPaymentSdkModule : Module() {
         khalti?.close()
         khalti = null
         promise.resolve(mapOf("status" to "closed"))
-        Log.d(KhaltiConstants.TAG, "Payment session closed successfully")
+        AppLogger.d("PaymentSession", "Payment session closed successfully")
       } catch (e: Exception) {
-        Log.e(KhaltiConstants.TAG, "Failed to close payment: ${e.message}", e)
+        AppLogger.e("PaymentSession", "Failed to close payment: ${e.message}", e)
         promise.reject(KhaltiConstants.ERROR_CLOSE_FAILED, "Failed to close payment: ${e.message}", e)
       }
     }
@@ -95,7 +94,7 @@ class KhaltiPaymentSdkModule : Module() {
           promise.resolve(null)
         }
       } catch (e: Exception) {
-        Log.e(KhaltiConstants.TAG, "Failed to get config: ${e.message}", e)
+        AppLogger.e("PaymentConfig", "Failed to get config: ${e.message}", e)
         promise.reject(KhaltiConstants.ERROR_GET_CONFIG, "Failed to get payment configuration: ${e.message}", e)
       }
     }
@@ -104,7 +103,7 @@ class KhaltiPaymentSdkModule : Module() {
     OnDestroy {
       khalti?.close()
       khalti = null
-      Log.d(KhaltiConstants.TAG, "KhaltiPaymentSdkModule destroyed")
+      AppLogger.d("ModuleLifecycle", "KhaltiPaymentSdkModule destroyed")
     }
   }
 
@@ -134,9 +133,9 @@ class KhaltiPaymentSdkModule : Module() {
       )
 
       khalti?.open()
-      Log.d(KhaltiConstants.TAG, "Payment initialized for PIDX: ${args.pidx}, Environment: ${args.environment}")
+      AppLogger.d("PaymentInit", "Payment initialized for PIDX: ${args.pidx}, Environment: ${args.environment}")
     } catch (e: Exception) {
-      Log.e(KhaltiConstants.TAG, "Payment initialization failed: ${e.message}", e)
+      AppLogger.e("PaymentInit", "Payment initialization failed: ${e.message}", e)
       throw PaymentInitException(e.message ?: "Unknown initialization error")
     }
   }

@@ -1,12 +1,12 @@
 package expo.modules.khaltipaymentsdk.handlers
 
-import android.util.Log
 import com.khalti.checkout.Khalti
 import com.khalti.checkout.data.PaymentResult
 import com.khalti.checkout.resource.OnMessageEvent
 import com.khalti.checkout.resource.OnMessagePayload
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.modules.Module
+import expo.modules.khaltipaymentsdk.AppLogger
 import expo.modules.khaltipaymentsdk.constants.KhaltiConstants
 import expo.modules.khaltipaymentsdk.exceptions.PaymentCanceledException
 import expo.modules.khaltipaymentsdk.exceptions.PaymentFailedException
@@ -21,7 +21,7 @@ class PaymentResultHandler(private val module: Module) {
    * Handles payment result from Khalti SDK.
    */
   fun handlePaymentResult(paymentResult: PaymentResult, khalti: Khalti, args: PaymentArgs, promise: Promise) {
-    Log.d(KhaltiConstants.TAG, "Payment result: ${paymentResult.status}, Transaction ID: ${paymentResult.payload?.transactionId}")
+    AppLogger.d("PaymentResult", "Payment result: ${paymentResult.status}, Transaction ID: ${paymentResult.payload?.transactionId}")
 
     try {
       khalti.close()
@@ -49,7 +49,7 @@ class PaymentResultHandler(private val module: Module) {
    * Handles payment messages (e.g., errors, cancellations) from Khalti SDK.
    */
   fun handlePaymentMessage(payload: OnMessagePayload, khalti: Khalti, args: PaymentArgs, promise: Promise) {
-    Log.w(KhaltiConstants.TAG, "Payment message: ${payload.event}, Code: ${payload.code}, Message: ${payload.message}")
+    AppLogger.w("PaymentMessage", "Payment message: ${payload.event}, Code: ${payload.code}, Message: ${payload.message}")
     try {
       khalti.close()
       when (payload.event) {
@@ -125,7 +125,7 @@ class PaymentResultHandler(private val module: Module) {
         }
       }
     } catch (e: Exception) {
-      Log.e(KhaltiConstants.TAG, "Error handling payment message: ${e.message}", e)
+      AppLogger.e("PaymentMessage", "Error handling payment message: ${e.message}", e)
       handlePaymentError("Failed to process payment message", e, promise)
     }
   }
@@ -134,7 +134,7 @@ class PaymentResultHandler(private val module: Module) {
    * Handles return URL callback from Khalti.
    */
   fun handlePaymentReturn(@Suppress("UNUSED_PARAMETER") khalti: Khalti) {
-    Log.d(KhaltiConstants.TAG, "Payment return URL loaded")
+    AppLogger.d("PaymentReturn", "Payment return URL loaded")
     // Optional: Send event to React Native if needed
     // module.sendEvent("onPaymentReturn", mapOf("status" to "return_url_loaded"))
   }

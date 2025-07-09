@@ -4,6 +4,9 @@ import android.util.Log
 import com.khalti.checkout.Khalti
 import com.khalti.checkout.data.Environment
 import com.khalti.checkout.data.KhaltiPayConfig
+import com.khalti.checkout.resource.OnMessagePayload
+import com.khalti.checkout.resource.OnMessageEvent
+import com.khalti.checkout.data.PaymentResult
 import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.exception.CodedException
@@ -37,13 +40,6 @@ class KhaltiPaymentSdkModule : Module() {
 
     private const val ENV_PROD = "PROD"
     private const val ENV_TEST = "TEST"
-
-    // Khalti OnMessageEvent constants
-    private const val EVENT_KPG_DISPOSED = "KPGDisposed"
-    private const val EVENT_RETURN_URL_FAILURE = "ReturnUrlLoadFailure"
-    private const val EVENT_NETWORK_FAILURE = "NetworkFailure"
-    private const val EVENT_PAYMENT_LOOKUP_FAILURE = "PaymentLookUpFailure"
-    private const val EVENT_UNKNOWN = "Unknown"
   }
 
   private var khalti: Khalti? = null
@@ -201,21 +197,21 @@ class KhaltiPaymentSdkModule : Module() {
    * Handles payment result from Khalti SDK.
    */
   private fun handlePaymentResult(paymentResult: PaymentResult, khalti: Khalti, args: PaymentArgs, promise: Promise) {
-    Log.d(TAG, "Payment result: ${paymentResult.status}, Transaction ID: ${paymentResult.payload.transactionId}")
+    Log.d(TAG, "Payment result: ${paymentResult.status}, Transaction ID: ${paymentResult.payload?.transactionId}")
 
     try {
       khalti.close()
       val payload = paymentResult.payload
       val successData = mapOf(
-        "pidx" to payload.pidx,
+        "pidx" to payload?.pidx,
         "status" to paymentResult.status,
-        "transactionId" to payload.transactionId,
-        "totalAmount" to payload.totalAmount,
-        "fee" to payload.fee,
-        "refunded" to payload.refunded,
-        "purchaseOrderId" to payload.purchaseOrderId,
-        "purchaseOrderName" to payload.purchaseOrderName,
-        "extraMerchantParams" to payload.extraMerchantParams,
+        "transactionId" to payload?.transactionId,
+        "totalAmount" to payload?.totalAmount,
+        "fee" to payload?.fee,
+        "refunded" to payload?.refunded,
+        "purchaseOrderId" to payload?.purchaseOrderId,
+        "purchaseOrderName" to payload?.purchaseOrderName,
+        "extraMerchantParams" to payload?.extraMerchantParams,
         "timestamp" to System.currentTimeMillis()
       )
       sendEvent("onPaymentSuccess", successData)
@@ -233,7 +229,7 @@ class KhaltiPaymentSdkModule : Module() {
     try {
       khalti.close()
       when (payload.event) {
-        EVENT_KPG_DISPOSED -> {
+        OnMessageEvent.KPGDisposed -> {
           val cancelData = mapOf(
             "pidx" to args.pidx,
             "reason" to "user_cancelled",
@@ -242,7 +238,7 @@ class KhaltiPaymentSdkModule : Module() {
           sendEvent("onPaymentCancel", cancelData)
           promise.reject(PaymentCanceledException())
         }
-        EVENT_RETURN_URL_FAILURE, EVENT_NETWORK_FAILURE, EVENT_PAYMENT_LOOKUP_FAILURE -> {
+        OnMessageEvent.ReturnUrlLoadFailure, OnMessageEvent.NetworkFailure, OnMessageEvent.PaymentLookUpFailure -> {
           val errorData = mapOf(
             "pidx" to args.pidx,
             "error" to payload.message,
@@ -254,7 +250,7 @@ class KhaltiPaymentSdkModule : Module() {
           sendEvent("onPaymentError", errorData)
           promise.reject(PaymentFailedException(payload.message, payload.throwable))
         }
-        EVENT_UNKNOWN -> {
+        OnMessageEvent.Unknown -> {
           val errorData = mapOf(
             "pidx" to args.pidx,
             "error" to payload.message,
@@ -348,31 +344,4 @@ class KhaltiPaymentSdkModule : Module() {
     val environment: String = ENV_TEST
   }
 
-  /**
-   * Khalti SDK type definitions.
-   */
-  data class PaymentResult(
-    val status: String,
-    val payload: PaymentPayload
-  )
-
-  data class PaymentPayload(
-    val pidx: String,
-    val totalAmount: Long,
-    val status: String,
-    val transactionId: String,
-    val fee: Long,
-    val refunded: Boolean,
-    val purchaseOrderId: String,
-    val purchaseOrderName: String,
-    val extraMerchantParams: Map<String, Any>
-  )
-
-  data class OnMessagePayload(
-    val event: String,
-    val message: String,
-    val throwable: Throwable?,
-    val code: Number,
-    val needsPaymentConfirmation: Boolean
-  )
 }

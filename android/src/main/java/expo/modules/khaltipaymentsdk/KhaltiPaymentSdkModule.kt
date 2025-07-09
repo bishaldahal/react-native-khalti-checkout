@@ -238,7 +238,7 @@ class KhaltiPaymentSdkModule : Module() {
           sendEvent("onPaymentCancel", cancelData)
           promise.reject(PaymentCanceledException())
         }
-        OnMessageEvent.ReturnUrlLoadFailure, OnMessageEvent.NetworkFailure, OnMessageEvent.PaymentLookUpFailure -> {
+        OnMessageEvent.ReturnUrlLoadFailure, OnMessageEvent.NetworkFailure -> {
           val errorData = mapOf(
             "pidx" to args.pidx,
             "error" to payload.message,
@@ -249,6 +249,19 @@ class KhaltiPaymentSdkModule : Module() {
           )
           sendEvent("onPaymentError", errorData)
           promise.reject(PaymentFailedException(payload.message, payload.throwable))
+        }
+        OnMessageEvent.PaymentLookUpFailure -> {
+          val errorMessage = "Payment lookup failed" 
+          val errorData = mapOf(
+            "pidx" to args.pidx,
+            "error" to errorMessage,
+            "status" to "failed",
+            "code" to payload.code,
+            "event" to payload.event,
+            "timestamp" to System.currentTimeMillis()
+          )
+          sendEvent("onPaymentError", errorData)
+          promise.reject(PaymentFailedException(message=errorMessage, payload.throwable))
         }
         OnMessageEvent.Unknown -> {
           val errorData = mapOf(

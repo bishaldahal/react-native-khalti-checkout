@@ -5,25 +5,27 @@
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
-    "build": "expo-module build",
+    "build": "expo-module tsc",
+    "build:watch": "expo-module build",
     "clean": "expo-module clean",
     "lint": "expo-module lint",
-    "test": "expo-module test",
+    "test": "expo-module jest --passWithNoTests --ci",
+    "test:watch": "expo-module test",
     "prepare": "expo-module prepare",
     "prepublishOnly": "expo-module prepublishOnly",
     "expo-module": "expo-module",
     "open:ios": "xed example/ios",
     "open:android": "open -a \"Android Studio\" example/android",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
-    "release": "standard-version",
-    "release:patch": "npm run build && standard-version --release-as patch",
-    "release:minor": "npm run build && standard-version --release-as minor",
-    "release:major": "npm run build && standard-version --release-as major",
-    "release:prerelease": "npm run build && standard-version --prerelease",
-    "release:alpha": "npm run build && standard-version --prerelease alpha",
-    "release:beta": "npm run build && standard-version --prerelease beta",
-    "release:dry": "standard-version --dry-run",
-    "release:first": "standard-version --first-release",
+    "release": "npx standard-version",
+    "release:patch": "npm run build && npx standard-version --release-as patch",
+    "release:minor": "npm run build && npx standard-version --release-as minor",
+    "release:major": "npm run build && npx standard-version --release-as major",
+    "release:prerelease": "npm run build && npx standard-version --prerelease",
+    "release:alpha": "npm run build && npx standard-version --release-as minor --prerelease alpha",
+    "release:beta": "npm run build && npx standard-version --release-as minor --prerelease beta",
+    "release:dry": "npx standard-version --dry-run",
+    "release:first": "npx standard-version --first-release",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "commit": "git-cz"
   },
@@ -101,46 +103,6 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
-  "standard-version": {
-    "scripts": {
-      "prebump": "npm run test && npm run build",
-      "posttag": "git push --follow-tags origin main && npm publish"
-    },
-    "types": [
-      {
-        "type": "feat",
-        "section": "Features"
-      },
-      {
-        "type": "fix",
-        "section": "Bug Fixes"
-      },
-      {
-        "type": "chore",
-        "hidden": true
-      },
-      {
-        "type": "docs",
-        "section": "Documentation"
-      },
-      {
-        "type": "style",
-        "hidden": true
-      },
-      {
-        "type": "refactor",
-        "section": "Code Refactoring"
-      },
-      {
-        "type": "perf",
-        "section": "Performance Improvements"
-      },
-      {
-        "type": "test",
-        "hidden": true
-      }
-    ]
-  },
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
@@ -148,12 +110,10 @@
   },
   "lint-staged": {
     "*.{js,ts,tsx}": [
-      "npm run lint",
-      "git add"
+      "npm run lint"
     ],
     "*.{json,md}": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ]
   },
   "nativeDependencies": {

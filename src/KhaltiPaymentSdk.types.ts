@@ -58,6 +58,8 @@ export type PaymentErrorPayload = {
  * Payment cancellation payload
  */
 export type PaymentCancelPayload = {
+  /** Payment identifier */
+  pidx: string;
   /** Reason for cancellation */
   reason?: string;
   /** Timestamp of cancellation */

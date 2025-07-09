@@ -1,6 +1,6 @@
-# Khalti Payment SDK Example
+# @bishaldahal/react-native-khalti-checkout Example
 
-This example app demonstrates how to integrate the Khalti Payment SDK into your React Native/Expo application.
+This example app demonstrates how to integrate the `@bishaldahal/react-native-khalti-checkout` SDK into your React Native/Expo application.
 
 ## Features
 
@@ -9,14 +9,18 @@ This example app demonstrates how to integrate the Khalti Payment SDK into your 
 - **Professional UI**: Clean, modern interface for testing
 - **Comprehensive Form**: Test different payment scenarios
 - **Security Warnings**: Built-in reminders about production security
+- **Real-time Validation**: Form validation with helpful error messages
+- **Customer Information**: Optional customer details integration
+- **Payment Status Tracking**: Live status updates during payment flow
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 16 or higher
-- Expo CLI
+- Expo CLI or Expo Development Build
 - Khalti Merchant Account (for testing/production)
+- Android device/emulator (iOS support coming soon)
 
 ### Installation
 
@@ -33,6 +37,11 @@ This example app demonstrates how to integrate the Khalti Payment SDK into your 
 3. Start the development server:
    ```bash
    npx expo start
+   ```
+
+4. Run on Android device or emulator:
+   ```bash
+   npx expo run:android
    ```
 
 ### Configuration
@@ -56,24 +65,26 @@ This example app demonstrates how to integrate the Khalti Payment SDK into your 
 ## Usage
 
 ### Test Mode (Default)
-- Uses Khalti's test environment
+- Uses Khalti's test environment (`https://a.khalti.com`)
 - Safe for development and testing
 - No real money transactions
+- Pre-configured test credentials included
 
 ### Production Mode
-- Uses Khalti's live environment
+- Uses Khalti's live environment (`https://khalti.com`)
 - Requires valid production credentials
 - Processes real payments
+- **Warning**: Only use with valid production keys
 
 ## Configuration Options
 
-| Field | Description | Example |
-|-------|-------------|---------|
-| Public Key | Your Khalti merchant public key | `test_public_key_xxx` |
-| Secret Key | Your Khalti merchant secret key | `test_secret_key_xxx` |
-| Environment | TEST or PROD | `TEST` |
-| Return URL | URL for payment completion | `https://yourapp.com/payment/` |
-| Website URL | Your website URL | `https://yourapp.com` |
+| Field | Description | Example | Required |
+|-------|-------------|---------|----------|
+| Public Key | Your Khalti merchant public key | `test_public_key_xxx` | ✅ |
+| Secret Key | Your Khalti merchant secret key | `test_secret_key_xxx` | ✅ |
+| Environment | TEST or PROD | `TEST` | ✅ |
+| Return URL | URL for payment completion | `https://yourapp.com/payment/` | ✅ |
+| Website URL | Your website URL | `https://yourapp.com` | ✅ |
 
 ## Testing Different Scenarios
 
@@ -92,6 +103,13 @@ This example app demonstrates how to integrate the Khalti Payment SDK into your 
 1. Use invalid credentials
 2. Test network failures
 3. Test user cancellation
+4. Test validation errors
+
+### Customer Information Testing
+1. Add customer name, email, and phone
+2. Test email validation
+3. Test phone number validation
+4. Verify customer data in payment flow
 
 ## Payment Flow
 
@@ -126,15 +144,56 @@ const config = {
 
 ### "Module not found" Error
 - Ensure the parent SDK is properly built: `cd .. && npm run build`
+- Verify the SDK is properly linked in your expo module
 
 ### "Invalid credentials" Error
 - Verify your public/secret keys are correct
 - Check if you're using TEST keys in TEST mode and PROD keys in PROD mode
+- Ensure there are no extra spaces in your keys
 
 ### Payment doesn't start
 - Verify your public key is valid
 - Check network connectivity
 - Ensure pidx is properly obtained from the API
+- Check if you're using the correct environment
+
+### Build/Development Issues
+- Use Expo Development Build, not Expo Go
+- Ensure Android emulator/device is properly connected
+- Check that all dependencies are installed correctly
+
+### Network/API Issues
+- Verify API endpoints are correct for your environment
+- Check if your secret key has proper permissions
+- Ensure your merchant account is properly set up
+
+## Features Demonstrated
+
+### Form Validation
+- Real-time input validation
+- Error message display
+- Required field indicators
+- Email and phone number validation
+
+### Payment Flow
+- Environment switching
+- Configuration management
+- Payment initiation
+- Status tracking
+- Event handling
+
+### Error Handling
+- Network error recovery
+- Invalid input handling
+- Payment failure scenarios
+- User cancellation handling
+
+### UI/UX Features
+- Loading states
+- Status indicators
+- Professional styling
+- Responsive design
+- Accessibility support
 
 ## API Reference
 

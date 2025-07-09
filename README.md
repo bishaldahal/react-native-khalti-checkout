@@ -1,4 +1,4 @@
-# Khalti Payment SDK for React Native/Expo
+# @bishaldahal/react-native-khalti-checkout
 
 A comprehensive React Native/Expo SDK for integrating Khalti Payment Gateway into your mobile applications. This SDK provides a seamless way to accept payments from Khalti users, eBanking users, mobile banking users, and card holders in Nepal.
 
@@ -11,25 +11,28 @@ A comprehensive React Native/Expo SDK for integrating Khalti Payment Gateway int
 - ✅ **Input Validation**: Built-in validation for payment parameters
 - ✅ **Development Tools**: Debug logging and utilities
 - ✅ **Memory Management**: Automatic cleanup of event listeners
+- ✅ **Android Support**: Native Android implementation using Khalti's Android SDK
+- ✅ **Expo Compatibility**: Works with Expo development builds
 
 ## Installation
 
 ```bash
 # Using npm
-npm install khalti-payment-sdk
+npm install @bishaldahal/react-native-khalti-checkout
 
 # Using yarn
-yarn add khalti-payment-sdk
+yarn add @bishaldahal/react-native-khalti-checkout
 
 # Using pnpm
-pnpm add khalti-payment-sdk
+pnpm add @bishaldahal/react-native-khalti-checkout
 ```
 
 ## Prerequisites
 
 1. **Khalti Merchant Account**: You need a Khalti merchant account to get your API keys
 2. **Expo Development Build**: This package requires native code, so Expo Go won't work
-3. **Android SDK**: Currently supports Android only (iOS support coming soon)
+3. **Android Device/Emulator**: Currently supports Android only (iOS support coming soon)
+4. **Node.js 16+**: Required for development
 
 ### Getting Khalti API Keys
 
@@ -41,7 +44,7 @@ pnpm add khalti-payment-sdk
 ### 1. Basic Payment Implementation
 
 ```typescript
-import KhaltiPaymentSdk from 'khalti-payment-sdk';
+import KhaltiPaymentSdk from '@bishaldahal/react-native-khalti-checkout';
 
 // Start payment
 const handlePayment = async () => {
@@ -63,7 +66,7 @@ const handlePayment = async () => {
 
 ```typescript
 import { useEffect } from 'react';
-import KhaltiPaymentSdk from 'khalti-payment-sdk';
+import KhaltiPaymentSdk from '@bishaldahal/react-native-khalti-checkout';
 
 const PaymentScreen = () => {
   useEffect(() => {
@@ -101,7 +104,7 @@ const PaymentScreen = () => {
 
 ```typescript
 import { useEvent } from 'expo';
-import KhaltiPaymentSdk from 'khalti-payment-sdk';
+import KhaltiPaymentSdk from '@bishaldahal/react-native-khalti-checkout';
 
 const PaymentComponent = () => {
   const onPaymentSuccess = useEvent(KhaltiPaymentSdk, 'onPaymentSuccess');
@@ -167,10 +170,6 @@ Subscribe to payment cancellation events.
 #### `removeAllListeners(): void`
 
 Removes all active event listeners.
-
-#### `getVersion(): string`
-
-Returns the SDK version.
 
 #### `isReady(): boolean`
 
@@ -246,7 +245,7 @@ interface PaymentErrorPayload {
 The SDK provides comprehensive error handling with specific error codes:
 
 ```typescript
-import { KhaltiErrorCode } from 'khalti-payment-sdk';
+import { KhaltiErrorCode } from '@bishaldahal/react-native-khalti-checkout';
 
 try {
   await KhaltiPaymentSdk.startPayment(args);
@@ -272,7 +271,7 @@ try {
 The SDK includes built-in validation for payment arguments:
 
 ```typescript
-import { validatePaymentArgs } from 'khalti-payment-sdk';
+import { validatePaymentArgs } from '@bishaldahal/react-native-khalti-checkout';
 
 const args = {
   publicKey: 'your_key',
@@ -349,9 +348,27 @@ Enable debug logging in development:
 
 Contributions are very welcome! Please refer to guidelines described in the [contributing guide](CONTRIBUTING.md).
 
+## Example Application
+
+Check out the [example application](./example) to see the SDK in action. The example demonstrates:
+
+- Environment configuration (Test/Production)
+- Advanced payment scenarios
+- Error handling implementations
+- UI integration patterns
+
+To run the example:
+
+```bash
+cd example
+npm install
+npx expo start
+```
+
 ## Support
 
 - **Documentation**: [Khalti Developer Docs](https://docs.khalti.com/)
+- **Issues**: [GitHub Issues](https://github.com/bishaldahal/react-native-khalti-checkout/issues)
 - **Email**: support@khalti.com
 
 ## License
@@ -362,10 +379,21 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ### v0.1.0
 - Initial release
-- Android support
+- Android support with Khalti's native Android SDK
 - Basic payment functionality
 - Event-driven architecture
 - Comprehensive error handling
+- TypeScript support
+- Input validation and sanitization
+- Development debugging tools
+
+## Platform Support
+
+| Platform | Status | Version |
+|----------|--------|---------|
+| Android  | ✅ Supported | API 21+ |
+| iOS      | 🚧 Coming Soon | iOS 12.0+ |
+| Web      | 🚧 Planned | Modern Browsers |
 
 ---
 

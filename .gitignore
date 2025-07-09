@@ -55,3 +55,18 @@ yarn-error.log
 
 # Expo
 .expo/*
+
+# Build outputs
+build/
+dist/
+
+# Secrets and config files
+example/config.json
+.env
+.env.local
+.env.production
+.env.development
+
+# Generated files
+*.log
+*.tgz

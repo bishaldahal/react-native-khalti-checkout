@@ -45,12 +45,16 @@
   "homepage": "https://github.com/bishaldahal/react-native-khalti-checkout#readme",
   "files": [
     "build",
-    "android",
+    "android/src",
+    "android/build.gradle",
     "ios",
     "src",
     "expo-module.config.json",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "engines": {
     "node": ">=16"

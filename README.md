@@ -346,7 +346,7 @@ Enable debug logging in development:
 
 ## Contributing
 
-Contributions are very welcome! Please refer to guidelines described in the [contributing guide](CONTRIBUTING.md).
+Contributions are very welcome! Please read our [Contributing Guide](CONTRIBUTING.md) to get started.
 
 ## Example Application
 

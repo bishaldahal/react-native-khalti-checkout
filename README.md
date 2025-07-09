@@ -44,20 +44,20 @@ pnpm add @bishaldahal/react-native-khalti-checkout
 ### 1. Basic Payment Implementation
 
 ```typescript
-import KhaltiPaymentSdk from '@bishaldahal/react-native-khalti-checkout';
+import KhaltiPaymentSdk from "@bishaldahal/react-native-khalti-checkout";
 
 // Start payment
 const handlePayment = async () => {
   try {
     const result = await KhaltiPaymentSdk.startPayment({
-      publicKey: 'your_khalti_public_key',
-      pidx: 'payment_identifier_from_backend',
-      environment: 'TEST' // or 'PROD'
+      publicKey: "your_khalti_public_key",
+      pidx: "payment_identifier_from_backend",
+      environment: "TEST", // or 'PROD'
     });
-    
-    console.log('Payment successful:', result);
+
+    console.log("Payment successful:", result);
   } catch (error) {
-    console.error('Payment failed:', error);
+    console.error("Payment failed:", error);
   }
 };
 ```
@@ -102,31 +102,16 @@ const PaymentScreen = () => {
 
 ### 3. Using Expo useEvent Hook
 
-```typescript
-import { useEvent } from 'expo';
-import KhaltiPaymentSdk from '@bishaldahal/react-native-khalti-checkout';
+> **⚠️ Currently Not Supported**
+>
+> The Expo `useEvent` hook integration is not yet available in this version. We recommend using the event listener approach shown in method 2 above for handling payment events.
+>
+> **Planned for future release** - This feature is on our roadmap and will be available in an upcoming version.
 
-const PaymentComponent = () => {
-  const onPaymentSuccess = useEvent(KhaltiPaymentSdk, 'onPaymentSuccess');
-  const onPaymentError = useEvent(KhaltiPaymentSdk, 'onPaymentError');
-  const onPaymentCancel = useEvent(KhaltiPaymentSdk, 'onPaymentCancel');
+**Alternative Approach:**
+For now, please use the standard event listener pattern as demonstrated in the "With Event Listeners" section above, which provides the same functionality with proper cleanup.
 
-  // Handle events
-  if (onPaymentSuccess) {
-    console.log('Payment successful:', onPaymentSuccess);
-  }
-
-  if (onPaymentError) {
-    console.log('Payment error:', onPaymentError);
-  }
-
-  if (onPaymentCancel) {
-    console.log('Payment cancelled');
-  }
-
-  // Rest of your component
-};
-```
+````
 
 ## API Reference
 
@@ -210,7 +195,7 @@ app.post('/create-khalti-payment', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-```
+````
 
 ## Type Definitions
 
@@ -219,13 +204,13 @@ app.post('/create-khalti-payment', async (req, res) => {
 interface PaymentArgs {
   publicKey: string;
   pidx: string;
-  environment?: 'TEST' | 'PROD';
+  environment?: "TEST" | "PROD";
 }
 
 // Success payload
 interface PaymentSuccessPayload {
   pidx: string;
-  status: 'completed' | 'needs_verification';
+  status: "completed" | "needs_verification";
   paymentResult?: string;
   message?: string;
   timestamp?: number;
@@ -234,7 +219,7 @@ interface PaymentSuccessPayload {
 // Error payload
 interface PaymentErrorPayload {
   error: string;
-  status: 'failed';
+  status: "failed";
   details?: string;
   timestamp?: number;
 }
@@ -245,7 +230,7 @@ interface PaymentErrorPayload {
 The SDK provides comprehensive error handling with specific error codes:
 
 ```typescript
-import { KhaltiErrorCode } from '@bishaldahal/react-native-khalti-checkout';
+import { KhaltiErrorCode } from "@bishaldahal/react-native-khalti-checkout";
 
 try {
   await KhaltiPaymentSdk.startPayment(args);
@@ -261,7 +246,7 @@ try {
       // Handle invalid configuration
       break;
     default:
-      // Handle other errors
+    // Handle other errors
   }
 }
 ```
@@ -271,17 +256,17 @@ try {
 The SDK includes built-in validation for payment arguments:
 
 ```typescript
-import { validatePaymentArgs } from '@bishaldahal/react-native-khalti-checkout';
+import { validatePaymentArgs } from "@bishaldahal/react-native-khalti-checkout";
 
 const args = {
-  publicKey: 'your_key',
-  pidx: 'payment_id',
-  environment: 'TEST'
+  publicKey: "your_key",
+  pidx: "payment_id",
+  environment: "TEST",
 };
 
 const validation = validatePaymentArgs(args);
 if (!validation.isValid) {
-  console.log('Validation errors:', validation.errors);
+  console.log("Validation errors:", validation.errors);
 }
 ```
 
@@ -290,7 +275,7 @@ if (!validation.isValid) {
 ### Test Credentials (Sandbox)
 
 - **Test Khalti ID**: 9800000000, 9800000001, 9800000002, 9800000003, 9800000004, 9800000005
-- **Test MPIN**: 1111  
+- **Test MPIN**: 1111
 - **Test OTP**: 987654
 
 ### Sample Test Implementation
@@ -299,14 +284,14 @@ if (!validation.isValid) {
 const testPayment = async () => {
   try {
     const result = await KhaltiPaymentSdk.startPayment({
-      publicKey: 'test_public_key_your_test_key',
-      pidx: 'test_pidx_from_your_backend',
-      environment: 'TEST'
+      publicKey: "test_public_key_your_test_key",
+      pidx: "test_pidx_from_your_backend",
+      environment: "TEST",
     });
-    
-    console.log('Test payment result:', result);
+
+    console.log("Test payment result:", result);
   } catch (error) {
-    console.error('Test payment failed:', error);
+    console.error("Test payment failed:", error);
   }
 };
 ```
@@ -316,10 +301,12 @@ const testPayment = async () => {
 ### Common Issues
 
 1. **"No current activity" error**
+
    - Ensure you're calling the payment method from a React component that's currently mounted
    - Check that your app has proper Activity context
 
 2. **Build failures**
+
    - Make sure you're using Expo Development Build, not Expo Go
    - Verify that all dependencies are properly installed
 
@@ -378,6 +365,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Changelog
 
 ### v0.1.0
+
 - Initial release
 - Android support with Khalti's native Android SDK
 - Basic payment functionality
@@ -389,11 +377,11 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Platform Support
 
-| Platform | Status | Version |
-|----------|--------|---------|
-| Android  | ✅ Supported | API 21+ |
-| iOS      | 🚧 Coming Soon | iOS 12.0+ |
-| Web      | 🚧 Planned | Modern Browsers |
+| Platform | Status         | Version         |
+| -------- | -------------- | --------------- |
+| Android  | ✅ Supported   | API 21+         |
+| iOS      | 🚧 Coming Soon | iOS 12.0+       |
+| Web      | 🚧 Planned     | Modern Browsers |
 
 ---
 

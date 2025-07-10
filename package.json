@@ -38,23 +38,11 @@
     "mobile-payment",
     "react-native",
     "khalti",
-    "khalti-checkout",
-    "react-native-khalti",
-    "khalti-react-native",
-    "khalti-payment-gateway",
-    "khalti-checkout-react-native",
-    "react-native-khalti-checkout",
-    "khalti-sdk-react-native",
-    "react-native-khalti-integration",
-    "react-native-nepali-payment-gateway",
-    "khalti-plugin",
-    "khalti-npm-package",
-    "khalti-react-native-example",
-    "install-khalti-react-native",
-    "react-native-payment-gateway",
-    "nepalese-payment-integration",
-    "khalti-react-native-module",
-    "react-native-payment-plugin"
+    "android",
+    "ios",
+    "checkout",
+    "native-module",
+    "example"
   ],
   "repository": {
     "type": "git",
@@ -76,9 +64,7 @@
     "android/build.gradle",
     "ios",
     "src",
-    "expo-module.config.json",
-    "LICENSE",
-    "THIRD_PARTY_NOTICES.md"
+    "expo-module.config.json"
   ],
   "engines": {
     "node": ">=16"

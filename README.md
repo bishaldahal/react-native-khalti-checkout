@@ -1,233 +1,566 @@
-# @bishaldahal/react-native-khalti-checkout
+# React Native Khalti Checkout
 
-A comprehensive React Native/Expo SDK for integrating Khalti Payment Gateway into your mobile applications. This SDK provides a seamless way to accept payments from Khalti users, eBanking users, mobile banking users, and card holders in Nepal.
+<div align="center">
 
-## Features
+[![npm version](https://badge.fury.io/js/@bishaldahal%2Freact-native-khalti-checkout.svg)](https://badge.fury.io/js/@bishaldahal%2Freact-native-khalti-checkout)
+[![npm downloads](https://img.shields.io/npm/dm/@bishaldahal/react-native-khalti-checkout.svg)](https://www.npmjs.com/package/@bishaldahal/react-native-khalti-checkout)
+[![Platform](https://img.shields.io/badge/platform-android-green.svg)](https://github.com/bishaldahal/react-native-khalti-checkout)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-- ✅ **Easy Integration**: Simple API with TypeScript support
-- ✅ **Comprehensive Error Handling**: Detailed error messages and validation
-- ✅ **Event-Driven Architecture**: Listen to payment events in real-time
-- ✅ **Environment Support**: Both TEST and PROD environments
-- ✅ **Input Validation**: Built-in validation for payment parameters
-- ✅ **Development Tools**: Debug logging and utilities
-- ✅ **Memory Management**: Automatic cleanup of event listeners
-- ✅ **Android Support**: Native Android implementation using Khalti's Android SDK
-- ✅ **Expo Compatibility**: Works with Expo development builds
+**🇳🇵 The most comprehensive React Native/Expo SDK for Khalti Payment Gateway**
 
-## Installation
+_Accept payments from Khalti wallet, eBanking, mobile banking, and cards seamlessly in your React Native and Expo applications._
+
+[📚 Documentation](#-api-reference) • [🚀 Quick Start](#-quick-start) • [💡 Examples](#-example-app) • [🐛 Issues](https://github.com/bishaldahal/react-native-khalti-checkout/issues)
+
+</div>
+
+## ✨ Features
+
+<div align="center">
+
+|    🚀 Easy Integration     |         🔒 Secure & Reliable         |        ⚡ Real-time Events         |
+| :------------------------: | :----------------------------------: | :--------------------------------: |
+| Simple API with TypeScript | Built-in validation & error handling | Listen to payment events instantly |
+
+|    🌍 Multi-environment    |       📱 Native Performance        |      🔧 Expo Compatible       |
+| :------------------------: | :--------------------------------: | :---------------------------: |
+| TEST and PROD environments | Uses Khalti's official Android SDK | Works with development builds |
+
+</div>
+
+- ✅ **Production Ready** - Used by apps in production
+- ✅ **Memory Safe** - Automatic cleanup of event listeners
+- ✅ **Developer Friendly** - Comprehensive documentation & examples
+- ✅ **Well Tested** - Extensive testing with real payment scenarios
+
+## 📦 Installation
 
 ```bash
-# Using npm
 npm install @bishaldahal/react-native-khalti-checkout
-
-# Using yarn
-yarn add @bishaldahal/react-native-khalti-checkout
-
-# Using pnpm
-pnpm add @bishaldahal/react-native-khalti-checkout
 ```
 
-## Prerequisites
+<details>
+<summary>Other package managers</summary>
 
-1. **Khalti Merchant Account**: You need a Khalti merchant account to get your API keys
-2. **Expo Development Build**: This package requires native code, so Expo Go won't work
-3. **Android Device/Emulator**: Currently supports Android only (iOS support coming soon)
-4. **Node.js 16+**: Required for development
+```bash
+# Yarn
+yarn add @bishaldahal/react-native-khalti-checkout
 
-### Getting Khalti API Keys
+# pnpm
+pnpm add @bishaldahal/react-native-khalti-checkout
 
-- **Sandbox/Test**: Sign up at [test-admin.khalti.com](https://test-admin.khalti.com/#/join/merchant)
-- **Production**: Visit [admin.khalti.com](https://admin.khalti.com/)
+# Bun
+bun add @bishaldahal/react-native-khalti-checkout
+```
 
-## Quick Start
+</details>
 
-### 1. Basic Payment Implementation
+## 📋 Prerequisites
+
+> **⚠️ Important**: This package requires native code and **does not work with Expo Go**. You need an [Expo Development Build](#-expo-setup-tutorial) or bare React Native app.
+
+### Requirements
+
+| Requirement           | Details                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------ |
+| 📱 **Platform**       | Android 5.0+ (API 21+) - iOS coming soon                                                         |
+| 🔑 **Khalti Account** | [Test](https://test-admin.khalti.com/#/join/merchant) \| [Production](https://admin.khalti.com/) |
+| ⚛️ **Node.js**        | Version 16 or higher                                                                             |
+| 🛠️ **Development**    | Expo Development Build OR React Native CLI                                                       |
+
+### Getting Started Checklist
+
+- [ ] 📱 Android device/emulator ready
+- [ ] 🔑 Khalti merchant account created
+- [ ] 📝 API keys obtained (public key for client)
+- [ ] 🏗️ Expo development build configured (if using Expo)
+
+## 🏗️ Expo Setup Tutorial
+
+Since this package requires native code, you need to create a **custom development build**. Follow this step-by-step guide:
+
+### Step 1: Create or Configure Your Expo Project
+
+<details>
+<summary><strong>For new projects</strong></summary>
+
+```bash
+# Create new Expo project
+npx create-expo-app MyKhaltiApp --template
+
+# Navigate to project
+cd MyKhaltiApp
+
+# Install the Khalti package
+npm install @bishaldahal/react-native-khalti-checkout
+```
+
+</details>
+
+<details>
+<summary><strong>For existing projects</strong></summary>
+
+```bash
+# In your existing Expo project
+npm install @bishaldahal/react-native-khalti-checkout
+```
+
+</details>
+
+### Step 2: Configure app.json/app.config.js
+
+Add the following configuration to your `app.json`:
+
+```json
+{
+  "expo": {
+    "name": "Your App Name",
+    "slug": "your-app-slug",
+    "version": "1.0.0",
+    "platforms": ["android"],
+    "android": {
+      "package": "com.yourcompany.yourapp",
+      "versionCode": 1,
+      "compileSdkVersion": 34,
+      "targetSdkVersion": 34,
+      "minSdkVersion": 21
+    },
+    "plugins": ["expo-build-properties"]
+  }
+}
+```
+
+> **💡 Tip**: Replace `com.yourcompany.yourapp` with your actual package name in reverse domain notation.
+
+### Step 3: Install Development Build Dependencies
+
+```bash
+# Install EAS CLI globally
+npm install -g @expo/eas-cli
+
+# Login to your Expo account
+eas login
+
+# Install development build dependencies
+npx expo install expo-dev-client
+
+# Configure EAS
+eas init
+```
+
+### Step 4: Configure EAS Build
+
+Create or update `eas.json`:
+
+```json
+{
+  "cli": {
+    "version": ">= 0.52.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "android": {
+        "buildType": "aab"
+      }
+    }
+  }
+}
+```
+
+### Step 5: Build Custom Development Client
+
+```bash
+# Build development client for Android
+eas build --profile development --platform android
+
+# Wait for build to complete (5-15 minutes)
+# Download and install the APK on your device/emulator
+```
+
+### Step 6: Start Development Server
+
+```bash
+# Start the Expo dev server
+npx expo start --dev-client
+
+# Scan QR code with your custom dev client app
+# Or press 'a' to open on Android emulator
+```
+
+### Step 7: Test the Integration
+
+Create a test component to verify everything works:
+
+```typescript
+// App.tsx or your component
+import React from "react";
+import { View, Button, Alert, StyleSheet } from "react-native";
+import KhaltiPaymentSdk from "@bishaldahal/react-native-khalti-checkout";
+
+export default function App() {
+  const testPayment = async () => {
+    try {
+      // Replace with your actual test credentials
+      const result = await KhaltiPaymentSdk.startPayment({
+        publicKey: "test_public_key_your_test_key",
+        pidx: "test_pidx_from_backend",
+        environment: "TEST",
+      });
+      Alert.alert("Success! 🎉", "Payment completed successfully");
+      console.log("Payment result:", result);
+    } catch (error) {
+      Alert.alert("Error ❌", error.message || "Payment failed");
+      console.error("Payment error:", error);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Button
+        title="🔥 Test Khalti Payment"
+        onPress={testPayment}
+        color="#5C2D91"
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#f5f5f5",
+  },
+});
+```
+
+> **💡 Pro Tip**: Replace the test credentials with actual values from your Khalti dashboard for real testing.
+
+### 🎯 Alternative: Local Development Build
+
+If you prefer building locally:
+
+```bash
+# Install Android development dependencies
+npx expo run:android
+
+# This will:
+# 1. Build the development client locally
+# 2. Install it on connected device/emulator
+# 3. Start the dev server
+```
+
+### ⚠️ Important Notes
+
+- **Expo Go won't work** - You must use custom development build
+- **First build takes time** - Subsequent builds are faster
+- **Android device recommended** - iOS support coming soon
+- **Test on real device** - Payment flows work best on physical devices
+
+### 🔧 Troubleshooting Setup
+
+<details>
+<summary><strong>Build fails with "SDK not found"</strong></summary>
+
+Make sure you have:
+
+- Android Studio installed
+- Android SDK configured
+- `ANDROID_HOME` environment variable set
+</details>
+
+<details>
+<summary><strong>"Module not found" error</strong></summary>
+
+- Rebuild your development client after adding new native dependencies
+- Clear Metro cache: `npx expo start --clear`
+</details>
+
+<details>
+<summary><strong>EAS Build issues</strong></summary>
+
+- Check your `app.json` configuration
+- Ensure proper package names and bundle identifiers
+- Review build logs in EAS dashboard
+</details>
+
+## 🚀 Quick Start
+
+> **💡 Already have Expo setup?** Jump to [Basic Payment](#basic-payment). Need setup help? Check [Expo Setup Tutorial](#-expo-setup-tutorial).
+
+### Basic Payment
 
 ```typescript
 import KhaltiPaymentSdk from "@bishaldahal/react-native-khalti-checkout";
 
-// Start payment
 const handlePayment = async () => {
   try {
     const result = await KhaltiPaymentSdk.startPayment({
       publicKey: "your_khalti_public_key",
-      pidx: "payment_identifier_from_backend",
-      environment: "TEST", // or 'PROD'
+      pidx: "payment_identifier_from_backend", // Get this from your server
+      environment: "TEST", // Use "PROD" for production
     });
 
-    console.log("Payment successful:", result);
+    console.log("✅ Payment successful:", result);
+    // Navigate to success screen or update UI
   } catch (error) {
-    console.error("Payment failed:", error);
+    console.error("❌ Payment failed:", error);
+    // Show error message to user
   }
 };
 ```
 
-### 2. With Event Listeners
+### Complete Example with Event Listeners
 
 ```typescript
-import { useEffect } from 'react';
-import KhaltiPaymentSdk from '@bishaldahal/react-native-khalti-checkout';
+import React, { useEffect } from "react";
+import KhaltiPaymentSdk from "@bishaldahal/react-native-khalti-checkout";
 
 const PaymentScreen = () => {
   useEffect(() => {
-    // Subscribe to payment events
-    const successSubscription = KhaltiPaymentSdk.onPaymentSuccess((payload) => {
-      console.log('Payment successful:', payload);
-      // Handle successful payment
+    // Set up event listeners
+    const successSub = KhaltiPaymentSdk.onPaymentSuccess((payload) => {
+      console.log("✅ Payment successful:", payload);
+      // Handle successful payment (save to database, show success screen, etc.)
     });
 
-    const errorSubscription = KhaltiPaymentSdk.onPaymentError((payload) => {
-      console.log('Payment failed:', payload);
-      // Handle payment error
+    const errorSub = KhaltiPaymentSdk.onPaymentError((payload) => {
+      console.log("❌ Payment failed:", payload);
+      // Handle payment failure (show error message, retry option, etc.)
     });
 
-    const cancelSubscription = KhaltiPaymentSdk.onPaymentCancel((payload) => {
-      console.log('Payment cancelled:', payload);
-      // Handle payment cancellation
+    const cancelSub = KhaltiPaymentSdk.onPaymentCancel((payload) => {
+      console.log("⏹️ Payment cancelled:", payload);
+      // Handle payment cancellation (return to previous screen, etc.)
     });
 
-    // Cleanup subscriptions
+    // Cleanup function
     return () => {
-      successSubscription.remove();
-      errorSubscription.remove();
-      cancelSubscription.remove();
+      successSub.remove();
+      errorSub.remove();
+      cancelSub.remove();
     };
   }, []);
 
+  // Your component JSX
   return (
-    // Your UI components
+    // Your payment UI components
   );
 };
 ```
 
-### 3. Using Expo useEvent Hook
+## 📖 API Reference
 
-> **⚠️ Currently Not Supported**
->
-> The Expo `useEvent` hook integration is not yet available in this version. We recommend using the event listener approach shown in method 2 above for handling payment events.
->
-> **Planned for future release** - This feature is on our roadmap and will be available in an upcoming version.
+### Core Methods
 
-**Alternative Approach:**
-For now, please use the standard event listener pattern as demonstrated in the "With Event Listeners" section above, which provides the same functionality with proper cleanup.
+| Method               | Description                    | Parameters    | Returns                          |
+| -------------------- | ------------------------------ | ------------- | -------------------------------- |
+| `startPayment(args)` | Initiates payment process      | `PaymentArgs` | `Promise<PaymentSuccessPayload>` |
+| `closePayment()`     | Closes current payment session | None          | `Promise<PaymentCloseResponse>`  |
+| `getPaymentConfig()` | Gets current configuration     | None          | `Promise<PaymentConfigResponse>` |
 
-````
-
-## API Reference
-
-### Methods
-
-#### `startPayment(args: PaymentArgs): Promise<PaymentSuccessPayload>`
-
-Initiates the payment process.
-
-**Parameters:**
-- `publicKey` (string): Your Khalti public key
-- `pidx` (string): Payment identifier from your backend
-- `environment` (optional): 'TEST' or 'PROD' (defaults to 'TEST')
-
-**Returns:** Promise that resolves with payment result
-
-#### `closePayment(): Promise<PaymentCloseResponse>`
-
-Closes the current payment session.
-
-#### `getPaymentConfig(): Promise<PaymentConfigResponse>`
-
-Gets the current payment configuration.
-
-### Event Listeners
-
-#### `onPaymentSuccess(listener): Subscription`
-
-Subscribe to successful payment events.
-
-#### `onPaymentError(listener): Subscription`
-
-Subscribe to payment error events.
-
-#### `onPaymentCancel(listener): Subscription`
-
-Subscribe to payment cancellation events.
-
-### Utility Methods
-
-#### `removeAllListeners(): void`
-
-Removes all active event listeners.
-
-#### `isReady(): boolean`
-
-Checks if the SDK is ready for payments.
-
-## Payment Flow
-
-1. **Backend Integration**: Create a payment in your backend using Khalti's API
-2. **Get PIDX**: Your backend should return a `pidx` (payment identifier)
-3. **Initialize Payment**: Call `startPayment()` with the `pidx`
-4. **Handle Events**: Listen to payment events for success/failure
-5. **Verify Payment**: Verify payment status in your backend
-
-### Backend Integration Example
-
-```javascript
-// Example backend endpoint to create payment
-app.post('/create-khalti-payment', async (req, res) => {
-  try {
-    const response = await fetch('https://a.khalti.com/api/v2/epayment/initiate/', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'key your_secret_key',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        return_url: 'https://yoursite.com/payment/success',
-        website_url: 'https://yoursite.com',
-        amount: req.body.amount, // in paisa
-        purchase_order_id: req.body.orderId,
-        purchase_order_name: req.body.orderName,
-      })
-    });
-
-    const data = await response.json();
-    res.json({ pidx: data.pidx });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-````
-
-## Type Definitions
+### Payment Arguments
 
 ```typescript
-// Payment arguments
 interface PaymentArgs {
-  publicKey: string;
-  pidx: string;
-  environment?: "TEST" | "PROD";
-}
-
-// Success payload
-interface PaymentSuccessPayload {
-  pidx: string;
-  status: "completed" | "needs_verification";
-  paymentResult?: string;
-  message?: string;
-  timestamp?: number;
-}
-
-// Error payload
-interface PaymentErrorPayload {
-  error: string;
-  status: "failed";
-  details?: string;
-  timestamp?: number;
+  publicKey: string; // Your Khalti public key (required)
+  pidx: string; // Payment identifier from backend (required)
+  environment?: "TEST" | "PROD"; // Environment (optional, defaults to 'TEST')
 }
 ```
 
-## Error Handling
+### Response Types
 
-The SDK provides comprehensive error handling with specific error codes:
+<details>
+<summary>View response interfaces</summary>
+
+```typescript
+interface PaymentSuccessPayload {
+  pidx: string;
+  txnId: string;
+  amount: number;
+  mobile: string;
+  // ... other fields
+}
+
+interface PaymentErrorPayload {
+  error_key: string;
+  error_description: string;
+  // ... other fields
+}
+```
+
+</details>
+
+### Event Listeners
+
+```typescript
+// Subscribe to payment events
+const successSubscription = KhaltiPaymentSdk.onPaymentSuccess(
+  (payload: PaymentSuccessPayload) => {
+    // Handle success
+  }
+);
+
+const errorSubscription = KhaltiPaymentSdk.onPaymentError(
+  (payload: PaymentErrorPayload) => {
+    // Handle error
+  }
+);
+
+const cancelSubscription = KhaltiPaymentSdk.onPaymentCancel((payload: any) => {
+  // Handle cancellation
+});
+
+// Utility methods
+KhaltiPaymentSdk.removeAllListeners(); // Clean up all listeners
+KhaltiPaymentSdk.isReady(); // Check if SDK is ready
+```
+
+## 🔄 Payment Flow
+
+1. **Create Payment** - Generate `pidx` in your backend using Khalti API
+2. **Initialize Payment** - Call `startPayment()` with the `pidx`
+3. **Handle Events** - Listen for success/error/cancel events
+4. **Verify Payment** - Confirm payment status in your backend
+
+### Backend Integration
+
+<details>
+<summary>📄 <strong>Node.js/Express Example</strong></summary>
+
+```javascript
+const express = require("express");
+const app = express();
+
+app.post("/create-khalti-payment", async (req, res) => {
+  try {
+    const response = await fetch(
+      "https://a.khalti.com/api/v2/epayment/initiate/",
+      {
+        method: "POST",
+        headers: {
+          Authorization: "key your_secret_key", // Your Khalti secret key
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          return_url: "https://yoursite.com/payment/success/",
+          website_url: "https://yoursite.com/",
+          amount: req.body.amount * 100, // Convert to paisa (smallest unit)
+          purchase_order_id: req.body.orderId,
+          purchase_order_name: req.body.orderName,
+          customer_info: {
+            name: req.body.customerName,
+            email: req.body.customerEmail,
+            phone: req.body.customerPhone,
+          },
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      res.json({
+        success: true,
+        pidx: data.pidx,
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: data.detail || "Payment initialization failed",
+      });
+    }
+  } catch (error) {
+    console.error("Khalti payment error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+});
+```
+
+</details>
+
+<details>
+<summary>🐍 <strong>Python/Django Example</strong></summary>
+
+```python
+import requests
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt
+def create_khalti_payment(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        payload = {
+            'return_url': 'https://yoursite.com/payment/success/',
+            'website_url': 'https://yoursite.com/',
+            'amount': data['amount'] * 100,  # Convert to paisa
+            'purchase_order_id': data['order_id'],
+            'purchase_order_name': data['order_name'],
+            'customer_info': {
+                'name': data['customer_name'],
+                'email': data['customer_email'],
+                'phone': data['customer_phone'],
+            }
+        }
+
+        headers = {
+            'Authorization': 'key your_secret_key',
+            'Content-Type': 'application/json',
+        }
+
+        try:
+            response = requests.post(
+                'https://a.khalti.com/api/v2/epayment/initiate/',
+                json=payload,
+                headers=headers
+            )
+
+            if response.status_code == 200:
+                return JsonResponse({
+                    'success': True,
+                    'pidx': response.json()['pidx']
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Payment initialization failed'
+                }, status=400)
+
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+```
+
+</details>
+
+## 🛡️ Error Handling
 
 ```typescript
 import { KhaltiErrorCode } from "@bishaldahal/react-native-khalti-checkout";
@@ -251,136 +584,376 @@ try {
 }
 ```
 
-## Validation
+## ✅ Validation
 
-The SDK includes built-in validation for payment arguments:
+Built-in validation for payment arguments:
 
 ```typescript
 import { validatePaymentArgs } from "@bishaldahal/react-native-khalti-checkout";
 
-const args = {
+const validation = validatePaymentArgs({
   publicKey: "your_key",
   pidx: "payment_id",
   environment: "TEST",
-};
+});
 
-const validation = validatePaymentArgs(args);
 if (!validation.isValid) {
   console.log("Validation errors:", validation.errors);
 }
 ```
 
-## Testing
+## 🧪 Testing
 
-### Test Credentials (Sandbox)
+### Test Credentials (Sandbox Environment)
 
-- **Test Khalti ID**: 9800000000, 9800000001, 9800000002, 9800000003, 9800000004, 9800000005
-- **Test MPIN**: 1111
-- **Test OTP**: 987654
+| Field         | Value                        | Notes                         |
+| ------------- | ---------------------------- | ----------------------------- |
+| **Khalti ID** | `9800000000` to `9800000005` | Use any of these test numbers |
+| **MPIN**      | `1111`                       | 4-digit PIN for Khalti wallet |
+| **OTP**       | `987654`                     | 6-digit verification code     |
 
-### Sample Test Implementation
+### Complete Test Implementation
 
 ```typescript
-const testPayment = async () => {
-  try {
-    const result = await KhaltiPaymentSdk.startPayment({
-      publicKey: "test_public_key_your_test_key",
-      pidx: "test_pidx_from_your_backend",
-      environment: "TEST",
+import React, { useState } from "react";
+import { View, Button, Text, Alert, ActivityIndicator } from "react-native";
+import KhaltiPaymentSdk from "@bishaldahal/react-native-khalti-checkout";
+
+const TestPayment = () => {
+  const [loading, setLoading] = useState(false);
+
+  const createTestPayment = async () => {
+    // Step 1: Create payment in your backend
+    const response = await fetch("YOUR_BACKEND_URL/create-khalti-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amount: 100, // NPR 100
+        orderId: `test-${Date.now()}`,
+        orderName: "Test Product",
+      }),
     });
 
-    console.log("Test payment result:", result);
-  } catch (error) {
-    console.error("Test payment failed:", error);
-  }
+    const data = await response.json();
+    return data.pidx;
+  };
+
+  const testPayment = async () => {
+    setLoading(true);
+    try {
+      // Get pidx from your backend
+      const pidx = await createTestPayment();
+
+      // Initiate payment
+      const result = await KhaltiPaymentSdk.startPayment({
+        publicKey: "test_public_key_your_test_key",
+        pidx: pidx,
+        environment: "TEST",
+      });
+
+      Alert.alert(
+        "✅ Success",
+        `Payment completed!\nTransaction ID: ${result.txnId}`
+      );
+      console.log("Payment result:", result);
+    } catch (error) {
+      Alert.alert("❌ Error", error.message || "Payment failed");
+      console.error("Payment error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <View style={{ padding: 20 }}>
+      <Button
+        title={loading ? "Processing..." : "Test Payment (NPR 100)"}
+        onPress={testPayment}
+        disabled={loading}
+      />
+      {loading && <ActivityIndicator style={{ marginTop: 10 }} />}
+    </View>
+  );
 };
 ```
 
-## Troubleshooting
+### Test Scenarios
 
-### Common Issues
+| Scenario                 | Khalti ID           | Expected Result                  |
+| ------------------------ | ------------------- | -------------------------------- |
+| **Successful Payment**   | `9800000000`        | Payment completes successfully   |
+| **Insufficient Balance** | `9800000001`        | Shows insufficient balance error |
+| **Invalid PIN**          | Use wrong MPIN      | Shows invalid PIN error          |
+| **Network Error**        | Disconnect internet | Shows network error              |
 
-1. **"No current activity" error**
+## 🔧 Troubleshooting
 
-   - Ensure you're calling the payment method from a React component that's currently mounted
-   - Check that your app has proper Activity context
+### Common Issues & Solutions
 
-2. **Build failures**
+<details>
+<summary><strong>❌ "No current activity" error</strong></summary>
 
-   - Make sure you're using Expo Development Build, not Expo Go
-   - Verify that all dependencies are properly installed
+**Cause**: Payment method called when React component is not properly mounted or Activity context is missing.
 
-3. **Payment not initiating**
-   - Verify your public key is correct
-   - Ensure the PIDX is valid and generated from your backend
-   - Check network connectivity
+**Solutions**:
+
+- Ensure you're calling payment from a mounted React component
+- Check that your app has proper Activity context
+- Wait for component to be fully loaded before initiating payment
+
+```typescript
+// ✅ Good practice
+const [isReady, setIsReady] = useState(false);
+
+useEffect(() => {
+  setIsReady(true);
+}, []);
+
+const handlePayment = () => {
+  if (!isReady) return;
+  // Proceed with payment
+};
+```
+
+</details>
+
+<details>
+<summary><strong>🔨 Build failures</strong></summary>
+
+**Cause**: Using Expo Go or missing development build configuration.
+
+**Solutions**:
+
+- ✅ Use Expo Development Build, not Expo Go
+- ✅ Verify all dependencies are installed: `npm install`
+- ✅ Clear cache: `npx expo start --clear`
+- ✅ Rebuild development client after adding native dependencies
+- ✅ Check `eas.json` configuration
+
+```bash
+# Clean and rebuild
+npx expo start --clear
+eas build --profile development --platform android --clear-cache
+```
+
+</details>
+
+<details>
+<summary><strong>🚫 Payment not initiating</strong></summary>
+
+**Cause**: Invalid configuration or network issues.
+
+**Solutions**:
+
+- ✅ Verify your public key is correct and active
+- ✅ Ensure PIDX is valid and generated from your backend
+- ✅ Check network connectivity
+- ✅ Validate environment setting (`TEST` vs `PROD`)
+- ✅ Check if payment amount meets minimum requirements
+
+```typescript
+// ✅ Validate before payment
+import { validatePaymentArgs } from "@bishaldahal/react-native-khalti-checkout";
+
+const validation = validatePaymentArgs(paymentArgs);
+if (!validation.isValid) {
+  console.error("Validation errors:", validation.errors);
+  return;
+}
+```
+
+</details>
+
+<details>
+<summary><strong>📱 "Module not found" or native module errors</strong></summary>
+
+**Cause**: Native module not properly linked or built.
+
+**Solutions**:
+
+- ✅ Rebuild your development client after installing the package
+- ✅ Clear Metro cache: `npx expo start --clear`
+- ✅ For bare React Native: `npx react-native clean && npx react-native run-android`
+- ✅ Check if package is properly listed in `package.json`
+
+```bash
+# For Expo projects
+npx expo run:android
+
+# For bare React Native
+cd android && ./gradlew clean && cd ..
+npx react-native run-android
+```
+
+</details>
 
 ### Debug Mode
 
-Enable debug logging in development:
+Debug logging is automatically enabled in development mode. Look for logs with `[KhaltiSDK]` prefix:
 
 ```typescript
-// The SDK automatically enables debug logging in development mode
-// Check your console for detailed logs starting with [KhaltiSDK]
+// Enable additional debugging (optional)
+console.log("Khalti SDK ready:", KhaltiPaymentSdk.isReady());
 ```
 
-## Security Best Practices
+### Getting Help
 
-1. **Never expose secret keys**: Only use public keys in your mobile app
-2. **Verify payments server-side**: Always verify payment status in your backend
-3. **Use HTTPS**: Ensure all API communications use HTTPS
-4. **Validate on backend**: Don't rely solely on client-side validation
+1. **Check logs**: Look for `[KhaltiSDK]` prefixed logs in your console
+2. **Validate args**: Use `validatePaymentArgs()` before calling `startPayment()`
+3. **Test environment**: Ensure you're using correct test credentials
+4. **Network**: Verify internet connectivity and API endpoints
+5. **Create issue**: If problem persists, [create an issue](https://github.com/bishaldahal/react-native-khalti-checkout/issues) with:
+   - Error message and stack trace
+   - Your configuration (without sensitive keys)
+   - Steps to reproduce
+   - Device/emulator information
 
-## Contributing
+## 🔒 Security Best Practices
 
-Contributions are very welcome! Please read our [Contributing Guide](CONTRIBUTING.md) to get started.
+- ✅ **Use public keys only** in mobile apps
+- ✅ **Verify payments server-side** always
+- ✅ **Use HTTPS** for all communications
+- ✅ **Validate on backend** - don't rely on client-side only
 
-## Example Application
+## 📱 Platform Support
 
-Check out the [example application](./example) to see the SDK in action. The example demonstrates:
+<div align="center">
 
-- Environment configuration (Test/Production)
-- Advanced payment scenarios
-- Error handling implementations
-- UI integration patterns
+| Platform       | Status             | Version                | Notes                           |
+| -------------- | ------------------ | ---------------------- | ------------------------------- |
+| 🤖 **Android** | ✅ **Available**   | API 21+ (Android 5.0+) | Fully supported with native SDK |
+| 🍎 **iOS**     | 🚧 **Coming Soon** | iOS 12.0+              | In development                  |
+| 🌐 **Web**     | 🔮 **Planned**     | Modern Browsers        | Future release                  |
 
-To run the example:
+</div>
+
+### Compatibility Matrix
+
+| React Native | Expo SDK | Node.js | Status             |
+| ------------ | -------- | ------- | ------------------ |
+| 0.72+        | 49+      | 16+     | ✅ Fully Supported |
+| 0.70-0.71    | 47-48    | 16+     | ⚠️ Partial Support |
+| < 0.70       | < 47     | < 16    | ❌ Not Supported   |
+
+> **📱 Android Recommendation**: For best experience, use Android 7.0+ (API 24+) with physical device testing.
+
+## 📝 Example App
+
+Explore our comprehensive [example application](./example) featuring:
+
+<div align="center">
+
+| 🔧 **Configuration**  | 💳 **Payment Scenarios** |    🚨 **Error Handling**     |  🎨 **UI Patterns**   |
+| :-------------------: | :----------------------: | :--------------------------: | :-------------------: |
+| Test/Production setup |  Complete payment flows  | Comprehensive error handling | Modern UI integration |
+
+</div>
+
+### Running the Example
 
 ```bash
-cd example
+# Clone and setup
+git clone https://github.com/bishaldahal/react-native-khalti-checkout.git
+cd react-native-khalti-checkout/example
+
+# Install dependencies
 npm install
-npx expo start
+
+# Start development server
+npx expo start --dev-client
 ```
 
-## Support
+### Example Features
 
-- **Documentation**: [Khalti Developer Docs](https://docs.khalti.com/)
-- **Issues**: [GitHub Issues](https://github.com/bishaldahal/react-native-khalti-checkout/issues)
-- **Email**: support@khalti.com
+- 📋 **Complete Integration**: Full payment flow implementation
+- 🎨 **UI Components**: Ready-to-use payment UI components
+- � **Test Scenarios**: Various payment test cases
+- 📱 **Best Practices**: Production-ready code patterns
+- 🔧 **Configuration**: Environment setup examples
 
-## License
+## �🤝 Contributing
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+We love contributions! Here's how you can help:
 
-## Changelog
+### Quick Contribution Guide
 
-- Initial release
-- Android support with Khalti's native Android SDK
-- Basic payment functionality
-- Event-driven architecture
-- Comprehensive error handling
-- TypeScript support
-- Input validation and sanitization
-- Development debugging tools
+1. **🍴 Fork** the repository
+2. **🌿 Create** your feature branch: `git checkout -b feature/amazing-feature`
+3. **💾 Commit** your changes: `git commit -m 'Add amazing feature'`
+4. **📤 Push** to the branch: `git push origin feature/amazing-feature`
+5. **🔀 Open** a Pull Request
 
-## Platform Support
+### Development Setup
 
-| Platform | Status         | Version         |
-| -------- | -------------- | --------------- |
-| Android  | ✅ Supported   | API 21+         |
-| iOS      | 🚧 Coming Soon | iOS 12.0+       |
-| Web      | 🚧 Planned     | Modern Browsers |
+```bash
+# Clone repository
+git clone https://github.com/bishaldahal/react-native-khalti-checkout.git
+cd react-native-khalti-checkout
+
+# Install dependencies
+npm install
+
+# Run example app
+cd example && npm install && npx expo start
+```
+
+### Guidelines
+
+- 📝 Follow existing code style and conventions
+- ✅ Add tests for new features
+- 📚 Update documentation when needed
+- 🧪 Test on real Android devices when possible
+
+See our [Contributing Guide](CONTRIBUTING.md) for detailed information.
+
+## 📞 Support & Community
+
+<div align="center">
+
+### 🆘 Need Help?
+
+| Resource             | Description           | Link                                                                                          |
+| -------------------- | --------------------- | --------------------------------------------------------------------------------------------- |
+| 📚 **Documentation** | Official Khalti docs  | [docs.khalti.com](https://docs.khalti.com/)                                                   |
+| 🐛 **Bug Reports**   | Report issues & bugs  | [GitHub Issues](https://github.com/bishaldahal/react-native-khalti-checkout/issues)           |
+| 💬 **Discussions**   | Community discussions | [GitHub Discussions](https://github.com/bishaldahal/react-native-khalti-checkout/discussions) |
+| 📧 **Email Support** | Direct email support  | support@khalti.com                                                                            |
+
+### 🔗 Useful Links
+
+- 🏠 [**Repository**](https://github.com/bishaldahal/react-native-khalti-checkout) - Main GitHub repository
+- 📦 [**NPM Package**](https://www.npmjs.com/package/@bishaldahal/react-native-khalti-checkout) - Package on npm registry
+- 📈 [**Changelog**](CHANGELOG.md) - Version history and updates
+- 🤝 [**Contributing**](CONTRIBUTING.md) - How to contribute
+- ⚖️ [**License**](LICENSE) - MIT License details
+
+### 🚀 Stay Updated
+
+- ⭐ **Star** this repository to show support
+- 👀 **Watch** for updates and releases
+- 🔔 **Follow** [@bishaldahal](https://github.com/bishaldahal) for updates
+
+</div>
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+### 📋 Third-Party Notices
+
+This package uses the official Khalti Android SDK. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for full license information.
 
 ---
 
-Made with ❤️ for the Nepalese developer community
+<div align="center">
+
+### 🇳🇵 Made with ❤️ for the Nepalese Developer Community
+
+**Found this helpful? Give it a ⭐ on GitHub!**
+
+[![GitHub stars](https://img.shields.io/github/stars/bishaldahal/react-native-khalti-checkout?style=social)](https://github.com/bishaldahal/react-native-khalti-checkout/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/bishaldahal/react-native-khalti-checkout?style=social)](https://github.com/bishaldahal/react-native-khalti-checkout/network/members)
+
+_Happy Coding! 🚀_
+
+</div>

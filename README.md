@@ -31,10 +31,10 @@ _Accept payments from Khalti wallet, eBanking, mobile banking, and cards seamles
 
 </div>
 
-- ✅ **Production Ready** - Used by apps in production
-- ✅ **Memory Safe** - Automatic cleanup of event listeners
-- ✅ **Developer Friendly** - Comprehensive documentation & examples
-- ✅ **Well Tested** - Extensive testing with real payment scenarios
+- **Production Ready** - Used by apps in production
+- **Memory Safe** - Automatic cleanup of event listeners
+- **Developer Friendly** - Comprehensive documentation & examples
+- **Well Tested** - Extensive testing with real payment scenarios
 
 ## 📦 Installation
 
@@ -73,10 +73,10 @@ bun add @bishaldahal/react-native-khalti-checkout
 
 ### Getting Started Checklist
 
-- [ ] 📱 Android device/emulator ready
-- [ ] 🔑 Khalti merchant account created
-- [ ] 📝 API keys obtained (public key for client)
-- [ ] 🏗️ Expo development build configured (if using Expo)
+- Android device/emulator ready
+- Khalti merchant account created
+- API keys obtained (public key for client)
+- Expo development build configured (if using Expo)
 
 ## 🏗️ Expo Setup Tutorial
 
@@ -810,10 +810,10 @@ console.log("Khalti SDK ready:", KhaltiPaymentSdk.isReady());
 
 ## 🔒 Security Best Practices
 
-- ✅ **Use public keys only** in mobile apps
-- ✅ **Verify payments server-side** always
-- ✅ **Use HTTPS** for all communications
-- ✅ **Validate on backend** - don't rely on client-side only
+- **Use public keys only** in mobile apps
+- **Verify payments server-side** always
+- **Use HTTPS** for all communications
+- **Validate on backend** - don't rely on client-side only
 
 ## 📱 Platform Support
 
@@ -921,17 +921,17 @@ See our [Contributing Guide](CONTRIBUTING.md) for detailed information.
 
 ### 🔗 Useful Links
 
-- 🏠 [**Repository**](https://github.com/bishaldahal/react-native-khalti-checkout) - Main GitHub repository
-- 📦 [**NPM Package**](https://www.npmjs.com/package/@bishaldahal/react-native-khalti-checkout) - Package on npm registry
-- 📈 [**Changelog**](CHANGELOG.md) - Version history and updates
-- 🤝 [**Contributing**](CONTRIBUTING.md) - How to contribute
-- ⚖️ [**License**](LICENSE) - MIT License details
+🏠 [**Repository**](https://github.com/bishaldahal/react-native-khalti-checkout) - Main GitHub repository
+📦 [**NPM Package**](https://www.npmjs.com/package/@bishaldahal/react-native-khalti-checkout) - Package on npm registry
+📈 [**Changelog**](CHANGELOG.md) - Version history and updates
+🤝 [**Contributing**](CONTRIBUTING.md) - How to contribute
+⚖️ [**License**](LICENSE) - MIT License details
 
 ### 🚀 Stay Updated
 
-- ⭐ **Star** this repository to show support
-- 👀 **Watch** for updates and releases
-- 🔔 **Follow** [@bishaldahal](https://github.com/bishaldahal) for updates
+⭐ **Star** this repository to show support
+👀 **Watch** for updates and releases
+🔔 **Follow** [@bishaldahal](https://github.com/bishaldahal) for updates
 
 </div>
 

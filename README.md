@@ -922,15 +922,21 @@ See our [Contributing Guide](CONTRIBUTING.md) for detailed information.
 ### 🔗 Useful Links
 
 🏠 [**Repository**](https://github.com/bishaldahal/react-native-khalti-checkout) - Main GitHub repository
+
 📦 [**NPM Package**](https://www.npmjs.com/package/@bishaldahal/react-native-khalti-checkout) - Package on npm registry
+
 📈 [**Changelog**](CHANGELOG.md) - Version history and updates
+
 🤝 [**Contributing**](CONTRIBUTING.md) - How to contribute
+
 ⚖️ [**License**](LICENSE) - MIT License details
 
 ### 🚀 Stay Updated
 
 ⭐ **Star** this repository to show support
+
 👀 **Watch** for updates and releases
+
 🔔 **Follow** [@bishaldahal](https://github.com/bishaldahal) for updates
 
 </div>

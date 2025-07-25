@@ -4,7 +4,7 @@
 
 [![npm version](https://badge.fury.io/js/@bishaldahal%2Freact-native-khalti-checkout.svg)](https://badge.fury.io/js/@bishaldahal%2Freact-native-khalti-checkout)
 [![npm downloads](https://img.shields.io/npm/dm/@bishaldahal/react-native-khalti-checkout.svg)](https://www.npmjs.com/package/@bishaldahal/react-native-khalti-checkout)
-[![Platform](https://img.shields.io/badge/platform-android-green.svg)](https://github.com/bishaldahal/react-native-khalti-checkout)
+[![Platform](https://img.shields.io/badge/platform-android%20%7C%20ios-green.svg)](https://github.com/bishaldahal/react-native-khalti-checkout)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
@@ -58,6 +58,22 @@ bun add @bishaldahal/react-native-khalti-checkout
 
 </details>
 
+### 📱 Platform-Specific Setup
+
+The SDK works out of the box with Expo development builds. For iOS, ensure you have:
+
+- **iOS 15.1+** minimum deployment target
+- **CocoaPods** installed (`sudo gem install cocoapods`)
+- **Xcode 14+** for building
+
+For pure React Native projects:
+
+```bash
+# iOS setup (run from project root)
+cd ios && pod install
+
+```
+
 ## 📋 Prerequisites
 
 > **⚠️ Important**: This package requires native code and **does not work with Expo Go**. You need an [Expo Development Build](#-expo-setup-tutorial) or bare React Native app.
@@ -66,7 +82,7 @@ bun add @bishaldahal/react-native-khalti-checkout
 
 | Requirement           | Details                                                                                          |
 | --------------------- | ------------------------------------------------------------------------------------------------ |
-| 📱 **Platform**       | Android 5.0+ (API 21+) - iOS coming soon                                                         |
+| 📱 **Platform**       | Android 5.0+ (API 21+) & iOS 15.1+                                                               |
 | 🔑 **Khalti Account** | [Test](https://test-admin.khalti.com/#/join/merchant) \| [Production](https://admin.khalti.com/) |
 | ⚛️ **Node.js**        | Version 16 or higher                                                                             |
 | 🛠️ **Development**    | Expo Development Build OR React Native CLI                                                       |
@@ -120,7 +136,7 @@ Add the following configuration to your `app.json`:
     "name": "Your App Name",
     "slug": "your-app-slug",
     "version": "1.0.0",
-    "platforms": ["android"],
+    "platforms": ["android", "ios"],
     "android": {
       "package": "com.yourcompany.yourapp",
       "versionCode": 1,
@@ -166,17 +182,26 @@ Create or update `eas.json`:
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "ios": {
+        "simulator": true
       }
     },
     "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
       }
     },
     "production": {
       "android": {
         "buildType": "aab"
+      },
+      "ios": {
+        "simulator": false
       }
     }
   }
@@ -189,8 +214,11 @@ Create or update `eas.json`:
 # Build development client for Android
 eas build --profile development --platform android
 
+# Build development client for iOS
+eas build --profile development --platform ios
+
 # Wait for build to complete (5-15 minutes)
-# Download and install the APK on your device/emulator
+# Download and install the APK/IPA on your device/emulator
 ```
 
 ### Step 6: Start Development Server
@@ -819,11 +847,11 @@ console.log("Khalti SDK ready:", KhaltiPaymentSdk.isReady());
 
 <div align="center">
 
-| Platform       | Status             | Version                | Notes                           |
-| -------------- | ------------------ | ---------------------- | ------------------------------- |
-| 🤖 **Android** | ✅ **Available**   | API 21+ (Android 5.0+) | Fully supported with native SDK |
-| 🍎 **iOS**     | 🚧 **Coming Soon** | iOS 12.0+              | In development                  |
-| 🌐 **Web**     | 🔮 **Planned**     | Modern Browsers        | Future release                  |
+| Platform       | Status           | Version                | Notes                           |
+| -------------- | ---------------- | ---------------------- | ------------------------------- |
+| 🤖 **Android** | ✅ **Available** | API 21+ (Android 5.0+) | Fully supported with native SDK |
+| 🍎 **iOS**     | ✅ **Available** | iOS 15.1+              | Fully supported with native SDK |
+| 🌐 **Web**     | 🔮 **Planned**   | Modern Browsers        | Future release                  |
 
 </div>
 

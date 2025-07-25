@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [Unreleased]
+
+### Features
+
+- **ios**: Complete iOS implementation using KhaltiCheckout SDK
+  - Added native iOS support with full API compatibility
+  - Implemented payment initialization, processing, and cleanup
+  - Added comprehensive error handling with proper error codes
+  - Created iOS-specific utilities, constants, and logging
+  - Full feature parity with Android implementation
+- **platform**: Updated documentation and build configuration for dual-platform support
+- **setup**: Added iOS setup script and installation instructions
+
+### Platform Support
+
+- ✅ **Android**: API 21+ (Android 5.0+) - Fully supported
+- ✅ **iOS**: iOS 15.1+ - Fully supported with native KhaltiCheckout SDK
+- 🔮 **Web**: Planned for future release
+
 ## [0.2.0-beta.4](https://github.com/bishaldahal/react-native-khalti-checkout/compare/v0.2.0-beta.3...v0.2.0-beta.4) (2025-07-10)
 
 ## [0.2.0-beta.3](https://github.com/bishaldahal/react-native-khalti-checkout/compare/v0.2.0-beta.2...v0.2.0-beta.3) (2025-07-10)

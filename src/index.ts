@@ -1,4 +1,3 @@
-import KhaltiPaymentSdkModule from "./KhaltiPaymentSdkModule";
 import {
   PaymentArgs,
   PaymentSuccessPayload,
@@ -9,6 +8,7 @@ import {
   KhaltiEventSubscription,
   //   KhaltiErrorCode,
 } from "./KhaltiPaymentSdk.types";
+import KhaltiPaymentSdkModule from "./KhaltiPaymentSdkModule";
 import {
   validatePaymentArgs,
   sanitizePaymentArgs,
@@ -62,7 +62,7 @@ class KhaltiPaymentSDK {
     if (isDevelopmentMode()) {
       console.log(
         `[KhaltiSDK] Starting payment with tracking ID: ${trackingId}`,
-        args
+        args,
       );
     }
 
@@ -91,7 +91,7 @@ class KhaltiPaymentSDK {
 
       // Re-throw with additional context
       throw new Error(
-        `Khalti payment failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Khalti payment failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
@@ -141,11 +141,11 @@ class KhaltiPaymentSDK {
    * @returns Subscription object that can be used to unsubscribe
    */
   onPaymentSuccess(
-    listener: (payload: PaymentSuccessPayload) => void
+    listener: (payload: PaymentSuccessPayload) => void,
   ): KhaltiEventSubscription {
     const subscription = KhaltiPaymentSdkModule.addListener(
       "onPaymentSuccess",
-      listener
+      listener,
     );
     this.subscriptions.push(subscription);
     return subscription;
@@ -158,11 +158,11 @@ class KhaltiPaymentSDK {
    * @returns Subscription object that can be used to unsubscribe
    */
   onPaymentError(
-    listener: (payload: PaymentErrorPayload) => void
+    listener: (payload: PaymentErrorPayload) => void,
   ): KhaltiEventSubscription {
     const subscription = KhaltiPaymentSdkModule.addListener(
       "onPaymentError",
-      listener
+      listener,
     );
     this.subscriptions.push(subscription);
     return subscription;
@@ -175,11 +175,11 @@ class KhaltiPaymentSDK {
    * @returns Subscription object that can be used to unsubscribe
    */
   onPaymentCancel(
-    listener: (payload?: PaymentCancelPayload) => void
+    listener: (payload?: PaymentCancelPayload) => void,
   ): KhaltiEventSubscription {
     const subscription = KhaltiPaymentSdkModule.addListener(
       "onPaymentCancel",
-      listener
+      listener,
     );
     this.subscriptions.push(subscription);
     return subscription;

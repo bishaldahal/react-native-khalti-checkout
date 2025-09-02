@@ -46,7 +46,7 @@ export function validatePaymentArgs(args: PaymentArgs): ValidationResult {
  * @returns Suggested environment
  */
 export function getEnvironmentFromPublicKey(
-  publicKey: string
+  publicKey: string,
 ): KhaltiEnvironment {
   return publicKey.startsWith("live_") ? "PROD" : "TEST";
 }

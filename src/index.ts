@@ -6,6 +6,7 @@ import {
   PaymentCancelPayload,
   PaymentConfigResponse,
   PaymentCloseResponse,
+  KhaltiEventSubscription,
   //   KhaltiErrorCode,
 } from "./KhaltiPaymentSdk.types";
 import {
@@ -15,7 +16,6 @@ import {
   generateTrackingId,
   isDevelopmentMode,
 } from "./utils";
-import { EventSubscription } from "expo-modules-core";
 
 /**
  * Khalti Payment SDK for React Native/Expo
@@ -37,7 +37,7 @@ import { EventSubscription } from "expo-modules-core";
  */
 class KhaltiPaymentSDK {
   private static instance: KhaltiPaymentSDK;
-  private subscriptions: EventSubscription[] = [];
+  private subscriptions: KhaltiEventSubscription[] = [];
 
   /**
    * Get singleton instance of the SDK
@@ -142,7 +142,7 @@ class KhaltiPaymentSDK {
    */
   onPaymentSuccess(
     listener: (payload: PaymentSuccessPayload) => void
-  ): EventSubscription {
+  ): KhaltiEventSubscription {
     const subscription = KhaltiPaymentSdkModule.addListener(
       "onPaymentSuccess",
       listener
@@ -159,7 +159,7 @@ class KhaltiPaymentSDK {
    */
   onPaymentError(
     listener: (payload: PaymentErrorPayload) => void
-  ): EventSubscription {
+  ): KhaltiEventSubscription {
     const subscription = KhaltiPaymentSdkModule.addListener(
       "onPaymentError",
       listener
@@ -176,7 +176,7 @@ class KhaltiPaymentSDK {
    */
   onPaymentCancel(
     listener: (payload?: PaymentCancelPayload) => void
-  ): EventSubscription {
+  ): KhaltiEventSubscription {
     const subscription = KhaltiPaymentSdkModule.addListener(
       "onPaymentCancel",
       listener

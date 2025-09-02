@@ -118,3 +118,7 @@ export type ValidationResult = {
   isValid: boolean;
   errors: string[];
 };
+
+export interface KhaltiEventSubscription {
+  remove(): void;
+}

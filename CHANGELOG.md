@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://github.com/bishaldahal/react-native-khalti-checkout/compare/v0.2.0-beta.5...v0.2.0) (2025-09-02)
+
+### Bug Fixes
+
+- remove expo-modules-core dependency and update event subscription types ([02e1e6d](https://github.com/bishaldahal/react-native-khalti-checkout/commit/02e1e6d92d6049337e1108f155cae067fbd4db01))
+
 ## [0.2.0-beta.5](https://github.com/bishaldahal/react-native-khalti-checkout/compare/v0.2.0-beta.4...v0.2.0-beta.5) (2025-07-28)
 
 ### Features

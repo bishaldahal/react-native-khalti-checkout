@@ -1,5 +1,5 @@
 {
-  "name": "khalti-payment-sdk-example",
+  "name": "Khalti Payment SDK Example",
   "version": "0.2.0",
   "description": "Example app demonstrating Khalti Payment SDK integration",
   "main": "index.ts",

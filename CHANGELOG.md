@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.1](https://github.com/bishaldahal/react-native-khalti-checkout/compare/v0.2.0...v0.2.1) (2025-09-05)
+
+### Features
+
+- **example:** add icons for example app ([09026cc](https://github.com/bishaldahal/react-native-khalti-checkout/commit/09026cc1d445c40ad5fee6dbb9d1915991146784))
+
+### Bug Fixes
+
+- update package name in package.json and package-lock.json for consistency ([60fe1ab](https://github.com/bishaldahal/react-native-khalti-checkout/commit/60fe1abd6fbf0f92f82528dcb583275cf1612369))
+
 ## [0.2.0](https://github.com/bishaldahal/react-native-khalti-checkout/compare/v0.2.0-beta.5...v0.2.0) (2025-09-02)
 
 ### Bug Fixes

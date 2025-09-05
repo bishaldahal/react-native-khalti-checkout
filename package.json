@@ -1,6 +1,6 @@
 {
   "name": "@bishaldahal/react-native-khalti-checkout",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "React Native/Expo SDK for Khalti Payment Gateway. Accept payments from Khalti, eBanking, mobile banking, and cards in Nepal.",
   "main": "build/index.js",
   "types": "build/index.d.ts",

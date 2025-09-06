@@ -13,7 +13,7 @@
 
 _Accept payments from Khalti wallet, eBanking, mobile banking, and cards in your Expo applications._
 
-[🚀 Quick Start](#-quick-start) • [📖 Usage](#-usage) • [💡 Examples](#-example-app) • [🐛 Issues](https://github.com/bishaldahal/react-native-khalti-checkout/issues)
+[🚀 Quick Start](#-quick-start) • [📖 Usage](#usage) • [💡 Examples](#example-app) • [🐛 Issues](https://github.com/bishaldahal/react-native-khalti-checkout/issues)
 
 </div>
 
@@ -58,7 +58,7 @@ const handlePayment = async () => {
 };
 ```
 
-That's the basic setup. [Jump to detailed setup](#-setup-guide) or [see complete example](#-usage).
+That's the basic setup. [Jump to detailed setup](#setup-guide) or [see complete example](#usage).
 
 ## ✨ Features
 
@@ -78,7 +78,7 @@ That's the basic setup. [Jump to detailed setup](#-setup-guide) or [see complete
 | **OS Support**     | Android 5.0+ (API 21) & iOS 15.1+ | -                                                                                          |
 | **Node.js**        | Version 16 or higher              | [Download](https://nodejs.org)                                                             |
 | **Khalti Account** | Merchant account with API keys    | [Test](https://test-admin.khalti.com/#/join/merchant) \| [Prod](https://admin.khalti.com/) |
-| **Development**    | Expo Development Build            | [Guide](#-setup-guide)                                                                     |
+| **Development**    | Expo Development Build            | [Guide](#setup-guide)                                                                     |
 
 ### Environment Variables
 

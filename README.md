@@ -130,10 +130,6 @@ npm install -g @expo/eas-cli
     "platforms": ["android", "ios"],
     "android": {
       "package": "com.yourcompany.yourapp",
-      "versionCode": 1,
-      "compileSdkVersion": 34,
-      "targetSdkVersion": 34,
-      "minSdkVersion": 21
     },
     "ios": {
       "bundleIdentifier": "com.yourcompany.yourapp"
